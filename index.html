@@ -1,0 +1,3406 @@
+
+<!doctype html public "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<title>Pismo File Mount Development Kit</title>
+</head>
+<body>
+<h1>Pismo File Mount Development Kit build 184</h1>
+<p>
+Pismo Technic Inc. Copyright 2006-2017 Joe Lowe
+<br>
+2017.01.04
+</p>
+
+<h1>Preface</h1>
+
+<p>
+This document is targeted towards software developers who are
+utilizing Pismo File Mount to implement or control file systems or
+pseudo file systems.
+</p>
+
+<h1>Contents</h1>
+<ul>
+<li><a href=#pfm>Pismo File Mount</a>
+<ul>
+<li><a href=#desc>Description</a>
+</li>
+<li><a href=#arch>Architecture</a>
+<ul>
+<li><a href=#arch-portability>Portability</a>
+</li>
+<li><a href=#arch-kernel>PFM Kernel Module</a>
+</li>
+<li><a href=#arch-protocol>PFM Protocol</a>
+</li>
+<li><a href=#arch-protocol>Servers</a>
+</li>
+<li><a href=#arch-api>PFM Application Programming Interface</a>
+</li>
+<li><a href=#arch-cmd>Command Line Interface</a>
+</li>
+<li><a href=#arch-install>Installer</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href=#pfmap>Pismo File Mount Audit Package</a>
+<ul>
+<li><a href=#pfmap-shx>Explorer shell extension</a>
+</li>
+<li><a href=#pfmap-control>Mount Control</a>
+</li>
+<li><a href=#pfmap-isofs>Formatters</a>
+</li>
+<li><a href=#pfmap-isofs>CD/DVD image file reader</a>
+</li>
+<li><a href=#pfmap-zipfs>Zip reader</a>
+</li>
+<li><a href=#pfmap-tempfs>RAM file system</a>
+</li>
+<li><a href=#pfmap-pfolder>Private Folder file system</a>
+</li>
+</ul>
+</li>
+<li><a href=#kit>PFM Development Kit</a>
+<ul>
+<li><a href=#kit-languages>Programming Languages</a>
+</li>
+<li><a href=#kit-c>C Header Files</a>
+</li>
+<li><a href=#kit-c>C++ Header Files</a>
+</li>
+<li><a href=#kit-clr>CLR (C#, VB) API Assembly</a>
+</li>
+<li><a href=#kit-java>Java API Jar</a>
+</li>
+<li><a href=#kit-samples>Samples</a>
+<ul>
+<li><a href=#sample-unmount>Mounter application in C, C++, C#, and Java</a>
+</li>
+<li><a href=#sample-hellofs>Hello World file system application in C, C++, C#, and Java</a>
+</li>
+<li><a href=#sample-tempfs>Temp file system application in C++ and C#</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href=#apidev>Application Development</a>
+<ul>
+<li><a href=#appdev-concepts>Concepts</a>
+<ul>
+<li><a href=#appdev-errors>Errors</a>
+</li>
+<li><a href=#appdev-mountid>Mount ID</a>
+</li>
+<li><a href=#appdev-mountsourcename>Mount Source Name</a>
+</li>
+<li><a href=#appdev-mountendname>Mount End Name</a>
+</li>
+<li><a href=#appdev-mountpoint>Mount Point</a>
+</li>
+<li><a href=#appdev-uncname>Mount UNC Name</a>
+</li>
+<li><a href=#appdev-changeinstance>Change Instances</a>
+</li>
+</ul>
+</li>
+<li><a href=#pfmapi>PfmApi interface</a>
+<ul>
+<li><a href=#pfmapi-factory>PfmApiFactory</a>
+</li>
+<li><a href=#pfmapi-release>PfmApi::Release</a>
+</li>
+<li><a href=#pfmapi-mountcreate>PfmApi::MountCreate</a>
+</li>
+<li><a href=#pfmapi-mountsourcenameopen>PfmApi::MountSourceNameOpen</a>
+</li>
+<li><a href=#pfmapi-mountendnameopen>PfmApi::MountEndNameOpen</a>
+</li>
+<li><a href=#pfmapi-mountpointopen>PfmApi::MountPointOpen</a>
+</li>
+<li><a href=#pfmapi-mountidopen>PfmApi::MountIdOpen</a>
+</li>
+<li><a href=#pfmapi-mountiterate>PfmApi::MountIterate</a>
+</li>
+<li><a href=#pfmapi-mountmonitorfactory>PfmApi::MountMonitorFactory</a>
+</li>
+<li><a href=#pfmapi-filemountfactory>PfmApi::FileMountFactory</a>
+</li>
+</ul>
+</li>
+<li><a href=#pfmfilemount>PfmFileMount interface</a>
+<ul>
+<li><a href=#pfmfilemount-release>PfmFileMount::Release</a>
+</li>
+<li><a href=#pfmfilemount-cancel>PfmFileMount::Cancel</a>
+</li>
+<li><a href=#pfmfilemount-start>PfmFileMount::Start</a>
+</li>
+<li><a href=#pfmfilemount-send>PfmFileMount::Send</a>
+</li>
+<li><a href=#pfmfilemount-status>PfmFileMount::Status</a>
+</li>
+<li><a href=#pfmfilemount-waitready>PfmFileMount::WaitReady</a>
+</li>
+<li><a href=#pfmfilemount-getmount>PfmFileMount::GetMount</a>
+</li>
+<li><a href=#pfmfilemount-detach>PfmFileMount::Detach</a>
+</li>
+</ul>
+</li>
+<li><a href=#pfmfilemountui>PfmFileMountUi</a>
+<ul>
+<li><a href=#pfmfilemountui-start>PfmFileMountUi::Start</a>
+</li>
+<li><a href=#pfmfilemountui-complete>PfmFileMountUi::Complete</a>
+</li>
+<li><a href=#pfmfilemountui-status>PfmFileMountUi::Status</a>
+</li>
+<li><a href=#pfmfilemountui-querypassword>PfmFileMountUi::QueryPassword</a>
+</li>
+<li><a href=#pfmfilemountui-clearpassword>PfmFileMountUi::ClearPassword</a>
+</li>
+</ul>
+</li>
+<li><a href=#pfmmount>PfmMount interface</a>
+<ul>
+<li><a href=#pfmmount-release>PfmMount::Release</a>
+</li>
+<li><a href=#pfmmount-refresh>PfmMount::Refresh</a>
+</li>
+<li><a href=#pfmmount-unmount>PfmMount::Unmount</a>
+</li>
+<li><a href=#pfmmount-getmountid>PfmMount::GetMountId</a>
+</li>
+<li><a href=#pfmmount-getmountflags>PfmMount::GetMountFlags</a>
+</li>
+<li><a href=#pfmmount-getstatusflags>PfmMount::GetStatusFlags</a>
+</li>
+<li><a href=#pfmmount-getvolumeflags>PfmMount::GetVolumeFlags</a>
+</li>
+<li><a href=#pfmmount-getchangeinstance>PfmMount::GetChangeInstance</a>
+</li>
+<li><a href=#pfmmount-getmountsourcename>PfmMount::GetMountSourceName</a>
+</li>
+<li><a href=#pfmmount-getmountendname>PfmMount::GetMountEndName</a>
+</li>
+<li><a href=#pfmmount-getmountpoint>PfmMount::GetMountPoint</a>
+</li>
+<li><a href=#pfmmount-getuncname>PfmMount::GetUncName</a>
+</li>
+<li><a href=#pfmmount-getdriveletter>PfmMount::GetDriveLetter</a>
+</li>
+<li><a href=#pfmmount-getownerid>PfmMount::GetOwnerId</a>
+</li>
+<li><a href=#pfmmount-getownername>PfmMount::GetOwnerName</a>
+</li>
+<li><a href=#pfmmount-getformattername>PfmMount::GetFormatterName</a>
+</li>
+<li><a href=#pfmmount-flush>PfmMount::Flush</a>
+</li>
+<li><a href=#pfmmount-control>PfmMount::Control</a>
+</li>
+<li><a href=#pfmmount-waitready>PfmMount::WaitReady</a>
+</li>
+</ul>
+</li>
+<li><a href=#pfmmountiterator>PfmMountIterator interface</a>
+<ul>
+<li><a href=#pfmmountiterator-release>PfmMountIterator::Release</a>
+</li>
+<li><a href=#pfmmountiterator-next>PfmMountIterator::Next</a>
+</li>
+</ul>
+</li>
+<li><a href=#pfmmountmonitor>PfmMountMonitor interface</a>
+<ul>
+<li><a href=#pfmmountmonitor-release>PfmMountMonitor::Release</a>
+</li>
+<li><a href=#pfmmountmonitor-wait>PfmMountMonitor::Wait</a>
+</li>
+<li><a href=#pfmmountmonitor-cancel>PfmMountMonitor::Cancel</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href=#fsdev>File System Development</a>
+<ul>
+<li><a href=#fsdev-start>Getting Started</a>
+</li>
+<li><a href=#fsdev-testing>Testing</a>
+</li>
+<li><a href=#fsdev-concepts>Concepts</a>
+<ul>
+<li><a href=#fsdev-errors>Portable Errors</a>
+</li>
+<li><a href=#fsdev-file>Folders are Files</a>
+</li>
+<li><a href=#fsdev-names>File Names</a>
+</li>
+<li><a href=#openid>OpenId and OpenSequence</a>
+</li>
+<li><a href=#fsdev-delete>Deleted Files</a>
+</li>
+<li><a href=#fsdev-concurrency>Concurrency</a>
+</li>
+<li><a href=#pfmmarshallerops>PfmMarshaller???Op objects</a>
+</li>
+<li><a href=#pfmformatterserializeopen>PfmFormatterSerializeOpen</a>
+</li>
+<li><a href=#pfmformatterops-open>void* formatterUse</a>
+</li>
+</ul>
+</li>
+<li><a href=#pfmmarshaller>PfmMarshaller interface</a>
+<ul>
+<li><a href=#pfmmarshaller-factory>PfmMarshallerFactory</a>
+</li>
+<li><a href=#pfmmarshaller-release>PfmMarshaller::Release</a>
+</li>
+<li><a href=#pfmmarshaller-settrace>PfmMarshaller::SetTrace</a>
+</li>
+<li><a href=#pfmmarshaller-setstatus>PfmMarshaller::SetStatus</a>
+</li>
+<li><a href=#pfmmarshaller-convertsystemerror>PfmMarshaller::ConvertSystemError</a>
+</li>
+<li><a href=#pfmmarshaller-getpassword>PfmMarshaller::GetPassword</a>
+</li>
+<li><a href=#pfmmarshaller-clearpassword>PfmMarshaller::ClearPassword</a>
+</li>
+<li><a href=#pfmmarshaller-servedispatch>PfmMarshaller::ServeDispatch</a>
+</li>
+<li><a href=#pfmmarshaller-print>PfmMarshaller::Print</a>
+</li>
+<li><a href=#pfmmarshaller-vprintf>PfmMarshaller::Vprintf</a>
+</li>
+<li><a href=#pfmmarshaller-printf>PfmMarshaller::Printf</a>
+</li>
+<li><a href=#pfmmarshaller-line>PfmMarshaller::Line</a>
+</li>
+</ul>
+</li>
+<li><a href=#pfmformatterdispatch>PfmFormatterDispatch</a>
+<ul>
+<li><a href=#pfmformatterdispatch-open>PfmFormatterDispatch::Open</a>
+</li>
+<li><a href=#pfmformatterdispatch-replace>PfmFormatterDispatch::Replace</a>
+</li>
+<li><a href=#pfmformatterdispatch-move>PfmFormatterDispatch::Move</a>
+</li>
+<li><a href=#pfmformatterdispatch-movereplace>PfmFormatterDispatch::MoveReplace</a>
+</li>
+<li><a href=#pfmformatterdispatch-delete>PfmFormatterDispatch::Delete</a>
+</li>
+<li><a href=#pfmformatterdispatch-close>PfmFormatterDispatch::Close</a>
+</li>
+<li><a href=#pfmformatterdispatch-flushfile>PfmFormatterDispatch::FlushFile</a>
+</li>
+<li><a href=#pfmformatterdispatch-list>PfmFormatterDispatch::List</a>
+</li>
+<li><a href=#pfmformatterdispatch-listend>PfmFormatterDispatch::ListEnd</a>
+</li>
+<li><a href=#pfmformatterdispatch-read>PfmFormatterDispatch::Read</a>
+</li>
+<li><a href=#pfmformatterdispatch-write>PfmFormatterDispatch::Write</a>
+</li>
+<li><a href=#pfmformatterdispatch-setsize>PfmFormatterDispatch::SetSize</a>
+</li>
+<li><a href=#pfmformatterdispatch-capacity>PfmFormatterDispatch::Capacity</a>
+</li>
+<li><a href=#pfmformatterdispatch-flushmedia>PfmFormatterDispatch::FlushMedia</a>
+</li>
+<li><a href=#pfmformatterdispatch-control>PfmFormatterDispatch::Control</a>
+</li>
+<li><a href=#pfmformatterdispatch-mediainfo>PfmFormatterDispatch::MediaInfo</a>
+</li>
+<li><a href=#pfmformatterdispatch-access>PfmFormatterDispatch::Access</a>
+</li>
+<li><a href=#pfmformatterdispatch-readxattr>PfmFormatterDispatch::ReadXattr</a>
+</li>
+<li><a href=#pfmformatterdispatch-writexattr>PfmFormatterDispatch::WriteXattr</a>
+</li>
+</ul>
+</li>
+<li><a href=#fsdev-datatypes>Data Types</a>
+<ul>
+<li><a href=#pfmmountflags>mountFlags</a>
+</li>
+<li><a href=#pfmunmountflags>unmountFlags</a>
+</li>
+<li><a href=#pfmstatusflags>statusFlags</a>
+</li>
+<li><a href=#pfmerror>pfmError</a>
+</li>
+<li><a href=#pfmfilemountflags>fileMountFlags</a>
+</li>
+<li><a href=#pfmfiletype>fileType</a>
+</li>
+<li><a href=#pfmfileflags>fileFlags</a>
+</li>
+<li><a href=#pfmcolor>color</a>
+</li>
+<li><a href=#pfmtime>time</a>
+</li>
+<li><a href=#pfmaccesslevel>accessLevel</a>
+</li>
+<li><a href=#pfmvolumeflags>volumeFlags</a>
+</li>
+<li><a href=#pfmflushflags>flushFlags</a>
+</li>
+<li><a href=#pfmattribs>PfmAttribs</a>
+</li>
+<li><a href=#pfmopenattribs>PfmOpenAttribs</a>
+</li>
+<li><a href=#pfmnamepart>PfmNamePart</a>
+</li>
+<li><a href=#pfmmediainfo>PfmMediaInfo</a>
+</li>
+<li><a href=#pfmfilemountcreateparams>PfmFileMountCreateParams</a>
+</li>
+<li><a href=#pfmmountcreateparams>PfmMountCreateParams</a>
+</li>
+<li><a href=#pfmmarshallerserveparams>PfmMarshallerServeParams</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h1><a name="pfm"></a>Pismo File Mount</a></h1>
+<h2><a name="desc"></a>Description</a></h2>
+
+
+<p>
+Pismo File Mount is a portable operating system extension
+that enables the development of file systems and file
+system extensions using common user mode application
+development tools.
+</p>
+<p>
+Applications can utilize Pismo File Mount to expose data
+through the file system as mounted volumes. Volumes are
+exposed through drive letters, UNC paths, or through a
+mount point on the system volume.
+</p>
+<p>
+PFM is cross platform, allowing implementation of file
+systems for Windows, Mac, and Linux operating systems.
+</p>
+<h2><a name="arch"></a>Architecture</a></h2>
+
+
+<p>
+PFM fundamentally implements a client-server architecture where
+the client sends file system requests to a local or remote server
+for processing.
+</p>
+<p>
+The client is the PFM kernel module (driver), and integrates with
+the local operating system to allow the system and applications to
+access the file system provided by the server.
+</p>
+<p>
+The server is the local or remote application that utilizes PFM
+to expose file system data.
+</p>
+
+<h3><a name="arch-portability"></a>Portability</a></h3>
+
+
+<p>
+PFM is available for Windows, Mac, and Linux operating systems. The
+PFM API and interfaces are consistent across all three platforms.
+</p>
+<p>
+The PFM API and interfaces can be used and implemented via a
+variety of programming languages, including:
+<ul>
+<li>C</li>
+<li>C++</li>
+<li>CLR languages (C#, VB, etc., using .Net or Mono)</li>
+<li>Java and other JVM targeting languages</li>
+</ul>
+<p>
+PFM operating system support and programming language flexibility
+make it an efficient solution for implementing portable file
+system projects and products.
+</p>
+<h3><a name="arch-kernel"></a>PFM Kernel Module</a></h3>
+
+
+<p>
+The core of the Pismo File Mount system extension is a
+kernel module that interfaces with the various core
+operating system interfaces, providing an installable
+file system that redirects application requests to a
+user mode or remote file system implementation.
+</p>
+
+<h3><a name="arch-protocol"></a>PFM Protocol</a></h3>
+
+
+<p>
+The communication between the PFM kernel module and the file system
+is done over a socket using the PFM Protocol. Most developers have
+no need to deal directly with the PFM Protocol.
+</p>
+
+<h3><a name="arch-protocol"></a>Servers</a></h3>
+
+
+<p>
+PFM Servers are any applications that utilize PFM to expose file
+system data.
+</p>
+<p>
+The PFM Audit Package is an application that contains a variety
+of PFM server imlpementations. These servers are referred to as
+"Formatters", each implemented in a loadable DLL that can decode
+container and/or archive files and expose the contents through
+the file system.
+</p>
+<p>
+Other applications will typically implement PFM servers directly
+using the <a href=#arch-api>PFM API</a>, not using the PFM Audit
+Package formatter architecture.
+</p>
+
+<h3><a name="arch-api"></a>PFM Application Programming Interface</a></h3>
+
+
+<p>
+Applications interact with and control PFM using the
+<a href=#pfmapi>PfmApi</a> interface and the associated interfaces
+<a href=#pfmmount>PfmMount</a>, <a href=#pfmfilemount>PfmFileMount</a>
+, and <a href=#pfmmarshaller>PfmMarshaller</a>.
+</p>
+
+<h3><a name="arch-cmd"></a>Command Line Interface</a></h3>
+
+
+<p>
+Pismo File Mount includes a command line interface. This
+is implemented as the "pfm" command, usable from a command
+or terminal prompt. Using pfm it is possible to:
+</p>
+<ul>
+<li>Mount PFM Audit Package support container files.</li>
+<li>Unmount mounts.</li>
+<li>List mounts.</li>
+<li>Register and unregister PFM Audit Package formatters.</li>
+<li>Uninstall core PFM files.</li>
+<li>Pre-load the PFM kernel module.</li>
+</ul>
+<p>
+The command line interface includes basic help information.
+Examples:
+</p>
+<pre>
+&gt;pfm -h
+&gt;pfm mount -h
+&gt;pfm mount myphotos.zip
+&gt;pfm unmount myphotos.zip
+</pre>
+
+<h3><a name="arch-install"></a>Installer</a></h3>
+
+
+<p>
+The <a href=#pfmap>PFM Audit Package</a> and 3rd party applications
+that incorporate PFM install the core PFM files using the
+provided installer "pfminst". Example:
+</p>
+<pre>
+&gt;pfminst install
+&gt;pfminst uninstall pfm-license-someapplication.txt
+</pre>
+<p>
+The PFM installer has been designed to reduce points of failure
+during install/upgrade/uninstall, to simplify integration with
+3rd party applications, and to reduce support costs.
+</p>
+<ul>
+<li>Zero reboots.
+<p>
+Careful attention to the design of PFM allows it to be installed,
+upgraded, and uninstalled, without restarting the system.
+</p>
+</li>
+<li>Self repairing.
+<p>
+PFM utilizes non state based install and uninstall logic. This
+makes fixing corrupted installations as simple as re-running the
+installer. The uninstaller can be run regardless of the state of
+the install, eliminating need for a separate installation cleanup
+tool for support.
+</p>
+</li>
+<li>Multiple client application support.
+<p>
+Numerous applications that utilize PFM can simultaneously be
+installed. Removing one application will not cause files needed by
+another application to be removed.
+</p>
+</li>
+<li>Managed forward and backward compatibility.
+<p>
+Installing a new application will not cause older PFM files to
+replace newer files, potentially breaking existing installed
+applications. Installing a new application will not remove
+optional PFM files that are used by existing installed
+applications.
+</p>
+</li>
+</ul>
+
+<h1><a name="pfmap"></a>Pismo File Mount Audit Package</a></h1>
+
+
+<p>
+The Pismo File Mount Audit Package (PFMAP) is a utility
+application that utilizes PFM. It allow users to mount the
+contents of container files to the filesystem as read-write
+or read-only volumes. PFMAP is built using the same PFM
+interfaces available to 3rd party application developers.
+</p>
+<p>
+In addition to being a useful stand-alone application,
+PFMAP can be used with the PFM Developer Kit by software
+developers.
+</p>
+
+<h2><a name="pfmap-shx"></a>Explorer shell extension</a></h2>
+
+
+<p>
+PFMAP includes a Windows Explorer shell extension. This shell
+extension allows convenient control of PFMAP directly from Explorer.
+</p>
+<ul>
+<li>Files can be mounted and unmounted through
+Explorer file and context menus.
+</li>
+<li>File types are registered, providing icons and
+default actions.
+</li>
+<li>New <a href=#pfmap-pfolder>Private Folder</a> files can be
+created through the explorer file/new menu.
+</ul>
+
+<h2><a name="pfmap-control"></a>Mount Control</a></h2>
+
+
+<p>
+The Mount Control application, pfmcontrol, is the graphical
+user interface to PFMAP. All functionality in PFMAP can be
+accessed through this application, independent of explorer or
+the PFM command line interface.
+</p>
+
+<h2><a name="pfmap-isofs"></a>Formatters</a></h2>
+
+
+<p>
+PFMAP supports a variety of container file formats. Each supported
+container format is implemented as a separate "formatter" DLL. When
+a container file is mounted, PFMAP locates the matching formatter
+DLL and uses it to create a PFM server for exposing the container
+file contents.
+</p>
+<p>
+Third party developers can implement new formatters and register
+them for use with PFMAP.
+</p>
+
+<h2><a name="pfmap-isofs"></a>CD/DVD image file reader</a></h2>
+
+
+<p>
+Pfmisofs.dll is a read-only DVD and CD image file formatter. It
+supports all or part of the following formats and extensions:
+</p>
+<ul>
+<li>ISO-9660
+</li>
+<li>Joliet extensions (Windows Unicode file names)
+</li>
+<li>UDF 1.02
+</li>
+<li>ISO image container format
+</li>
+<li>Compact ISO (CISO) image container format
+</li>
+<li>Compact File Set (CFS) images
+</li>
+</ul>
+
+<h2><a name="pfmap-zipfs"></a>Zip reader</a></h2>
+
+
+<p>
+Pfmzipfs is a read-only ZIP archive file formatter. It
+supports the following formats and compression modes:
+</p>
+<ul>
+<li>Pkzip 2.0 file format
+</li>
+<li>64 bit file size extensions
+</li>
+<li>Deflate compression
+</li>
+<li>Deflate64 compression
+</li>
+<li>Bzip2 compression
+</li>
+<li>Lzma compression
+</li>
+<li>UTF8 file names
+</li>
+<li>Unix ZIP file support (non DOS/OEM file names)
+</li>
+</ul>
+<p>
+The implementation is missing the following potentially useful
+features:
+</p>
+<ul>
+<li>Pkzip 2.0 password protection
+</li>
+<li>Winzip AES encryption extension
+</li>
+<li>Pkware encryption extensions
+</li>
+<li>Non-standard/advanced compression algorithms
+(ppmd, wavpack, ...)
+</li>
+<li>Legacy compression algorithms (shrink, implode, ...)
+</ul>
+
+<h2><a name="pfmap-tempfs"></a>RAM file system</a></h2>
+
+
+<p>
+Pfmramfs.dll implements a read-write temporary virtual file
+system.
+</p>
+<p>
+The RAM file system stores all file data in system memory.
+This limits the maximum amount of stored file data based on
+available physical memory and swap file space. On 32 bit
+systems the amount of stored file data cannot exceed 2GB due
+to limited process address space.
+</p>
+
+<h2><a name="pfmap-pfolder"></a>Private Folder file system</a></h2>
+
+
+<p>
+Pfmpfolderfs implements a read, write, encrypted, compressed
+container file formatter. It allows storing sensitive files in
+a secure container file, accessible only with the correct
+password.
+</p>
+<p>
+The user supplied password is converted to an encryption key
+using the PKCS5V2 algorithm. Data is encrypted using the AES
+encryption algorithm in XTS chaining mode.
+</p>
+<p>
+Data compression uses the Zlib implementation of the deflate
+compression format. This is the same compression used in PNG
+images and ZIP archives.
+</p>
+<p>
+The Private Folder data format documentation is not yet ready
+for public release. Pre-release information will be provided
+to interested parties upon request. For more information
+contact Pismo Technic Inc. support.
+</p>
+
+<h1><a name="kit"></a>PFM Development Kit</a></h1>
+
+
+<p>
+The PFM Development Kit allows developers to build file
+systems using PFM. The kit also can be used to integrate
+existing PFMAP file systems into 3rd party applications.
+</p>
+
+<h2><a name="kit-languages"></a>Programming Languages</a></h2>
+
+
+<p>
+PFM supports development in a variety of programming languges,
+including:
+</p>
+<ul>
+<li>C</li>
+<li>C++</li>
+<li>CLR languages (C#, VB, etc., using .Net or Mono)</li>
+<li>Java and other JVM targeting languages</li>
+</ul>
+<p>
+A primary goal with PFM programming language support is to have a
+largely similar API across all programming languages. This is to
+allow for consistent documentation across all languages, as well
+as to allow sharing of support information and documentation
+between developers and projects using different programming
+languages.
+</p>
+<p>
+A consequence of the PFM API portability is that it is not
+customized for each programming language to follow common language
+specific practices. As an example, PFM API methods return error
+codes for all programming languages, as opposed to throwing
+exceptions. Developers are encouraged to wrap the PFM API as they
+see fit to make it fit their style of programming.
+</p>
+<p>
+This documentation describes the API using C++ syntax. Developers
+using other languages will need to refer to the class, assembly, or
+header files, for the syntactic differences.
+</p>
+<h2><a name="kit-c"></a>C Header Files</a></h2>
+
+
+<p>
+The PFM API is defined in a C header file.
+</p>
+<ul>
+<li><a href="include/pfmapi.h">pfmapi.h</a></li>
+</ul>
+<p>
+The C PFM API linkage is handled using inline code.
+Applications do not need to link to any PFM library at build
+time, and applications can load on systems where PFM is not
+installed.
+</p>
+<h2><a name="kit-c"></a>C++ Header Files</a></h2>
+
+
+<p>
+The PFM API is defined in a C++ header file.
+</p>
+<ul>
+<li><a href="include/pfmapi.hxx">pfmapi.hxx</a></li>
+</ul>
+<p>
+Note that if you include the C versions of the above header
+in C++ code, it will automatically include the C++ version.
+</p>
+<p>
+The C++ PFM API linkage is handled using inline code.
+Applications do not need to link to any PFM library at build
+time, and applications can load on systems where PFM is not
+installed.
+</p>
+
+<h2><a name="kit-clr"></a>CLR (C#, VB) API Assembly</a></h2>
+
+
+<p>
+The CLR (C#, VB) PFM API is implemented in a portable assembly
+DLL and with a number of platform specific native DLLs. These
+files are all located in the "clr" folder in the PFM Developer
+Kit. Applications using the CLR PFM API will distribute the API
+assembly and DLLs with their application and will not install
+them to or load them from a shared location on the system.
+</p>
+<ul>
+<li><a href="clr/pfmclr_184.dll">pfmclr_184.dll</a></li>
+<li>win-x64/pfmshim_184.dll</li>
+<li>win-x86/pfmshim_184.dll</li>
+<li>mac-x64/pfmshim_184.so</li>
+<li>mac-x86/pfmshim_184.so</li>
+<li>lin-x64/pfmshim_184.dylib</li>
+<li>lin-x86/pfmshim_184.dylib</li>
+</ul>
+<p>
+The PFM API assembly is compatible with the Microsoft .NET
+runtime on Windows, and with the Mono runtime on Mac and Linux.
+</p>
+<p>
+Though the PFM API assembly and helper libraries are versioned
+with a PFM build number, they can be used with any matching or
+newer PFM build.
+</p>
+
+<h2><a name="kit-java"></a>Java API Jar</a></h2>
+
+
+<p>
+The Java PFM API is implemented in a portable jar file.
+</p>
+<ul>
+<li><a href="java/pfmjvm_184.jar">pfmjvm_184.jar</a></li>
+</ul>
+<p>
+This jar contains all needed classes and JNI libraries for
+interfacing with PFM from Java applications. Applications using
+the Java PFM API will distribute the API jar with their application
+and will not install it to or load it from a shared location on the
+system.
+</p>
+<p>
+The Java PFM API is compatible with a variety of JVM implementations
+and platforms. It includes the following JNI libraries:
+</p>
+<ul>
+<li>win-x64/pfmjni_184.dll</li>
+<li>win-x86/pfmjni_184.dll</li>
+<li>mac-x64/pfmjni_184.so</li>
+<li>mac-x86/pfmjni_184.so</li>
+<li>lin-x64/pfmjni_184.dylib</li>
+<li>lin-x86/pfmjni_184.dylib</li>
+</ul>
+<p>
+Though the Java PFM API is versioned with a PFM build number, it can
+be used with any matching or newer PFM build.
+</p>
+
+<h2><a name="kit-samples"></a>Samples</a></h2>
+<h3><a name="sample-unmount"></a>Mounter application in C, C++, C#, and Java</a></h3>
+
+
+<p>
+The mounter sample demonstrates integrating PFMAP formatters into
+an application to allow mounting and unmounting container files
+such as zip and ISO.
+</p>
+<ul>
+<li><a href="samples/mounter_c/mounter.c">mounter.c</a></li>
+<li><a href="samples/mounter_cpp/mounter.cpp">mounter.cpp</a></li>
+<li><a href="samples/mounter_cs/mounter.cs">mounter.cs</a></li>
+<li><a href="samples/mounter_java/mounter.java">mounter.java</a></li>
+</ul>
+
+<h3><a name="sample-hellofs"></a>Hello World file system application in C, C++, C#, and Java</a></h3>
+
+
+<p>
+Hellofs is a very simple virtual file system application. When
+run, this application presents a virtual file system containing
+a single read-only file, named readme.txt, containing the text
+"hello world".
+</p>
+<ul>
+<li><a href="samples/hellofs_c/hellofs.c">hellofs.c</a></li>
+<li><a href="samples/hellofs_cpp/hellofs.cpp">hellofs.cpp</a></li>
+<li><a href="samples/hellofs_cs/hellofs.cs">hellofs.cs</a></li>
+<li><a href="samples/hellofs_java/hellofs.java">hellofs.java</a></li>
+</ul>
+
+<h3><a name="sample-tempfs"></a>Temp file system application in C++ and C#</a></h3>
+
+
+<p>
+Tempfs an application that presents a read-write temporary virtual
+file system volume. When executed it creates an empty volume in
+which new files and folders can be created. All contained data is
+discarded when the application exits.
+</p>
+<ul>
+<li><a href="samples/tempfs_cpp/tempfs.cpp">tempfs.cpp</a></li>
+<li><a href="samples/tempfs_cs/tempfs.cs">tempfs.cs</a></li>
+</ul>
+
+<h1><a name="apidev"></a>Application Development</a></h1>
+
+
+<p>
+The PFM API allows direct integration of PFM with applications.
+Integration with PFM allows applications to perform a number of
+useful functions.
+</p>
+<ul>
+<li>Mount container files via PFM supplied formatters, either
+in-process or out-of-process.</li>
+<li>Enumerate, query, and unmount PFM volumes.</li>
+<li>Create new mounted volumes exposed through the file system,
+using data generated by the application.</li>
+</ul>
+
+<h2><a name="appdev-concepts"></a>Concepts</a></h2>
+<h3><a name="appdev-errors"></a>Errors</a></h3>
+
+
+<p>
+The PFM API methods return system error codes
+such as ERROR_ACCESS_DENIED on Windows or EACCESS
+on Mac and Linux.
+</p>
+
+<h3><a name="appdev-mountid"></a>Mount ID</a></h3>
+
+
+<p>
+Each time a new mount is created it is assigned a
+unique identifier. This identifier is used in the
+various interfaces to identify the mount. Mount-ids
+are not reused until after the system is restarted.
+</p>
+
+<h3><a name="appdev-mountsourcename"></a>Mount Source Name</a></h3>
+
+
+<p>
+Each mount is given an application chosen unique
+mount-source-name when it is created. The mount-source-name
+is formatted as a file-name or URL, where slashes are
+considered special characters.
+</p>
+
+<h3><a name="appdev-mountendname"></a>Mount End Name</a></h3>
+
+
+<p>
+For each mount, PFM generates a unique mount-end-name. This
+name is the portion of the mount-source-name following the
+last slash character, with a number suffix appended when
+necessary to make it unique. The mount-end-name is used in
+the mount-point and UNC name.
+</p>
+
+<h3><a name="appdev-mountpoint"></a>Mount Point</a></h3>
+
+
+<p>
+Each mount is accessible through a mount point created in the
+<system-drive>\Volumes folder on Windows, the /Volumes folder on
+Mac, and the /media folder on Linux. The mount-end-name is used
+as the name of the mount-point.
+</p>
+
+<h3><a name="appdev-uncname"></a>Mount UNC Name</a></h3>
+
+
+<p>
+On Windows, each mount is accessible through a UNC name in the
+format "\\-\mount-end-name".
+</p>
+
+<h3><a name="appdev-changeinstance"></a>Change Instances</a></h3>
+
+
+<p>
+PFM maintains a change-instance count for the mount list
+and for each individual mount. Each time mount status
+changes the mounts change-instance is incremented. Each time
+a mount is created or destroyed the mount list change-instance
+is incremented. These change instances are used with
+<a href=#pfmapi-mountiterate>PfmApi::MountIterate</a> and
+<a href=#pfmmountmonitor-wait>PfmMountMonitor::Wait</a> to allow
+applications to efficiently monitor for mount status and mount
+list changes.
+</p>
+
+<h2><a name="pfmapi"></a>PfmApi interface</a></h2>
+
+
+
+<p>
+The PfmApi interface allows applications to interact with
+and control PFM.
+</p>
+
+<h3><a name="pfmapi-factory"></a>PfmApiFactory</a></h3>
+
+
+
+<pre>
+int /*error*/ PfmApiFactory (
+   PfmApi** api )
+</pre>
+<p>
+This function retrieves an instance of the PfmApi interface.
+</p>
+
+
+<h3><a name="pfmapi-release"></a>PfmApi::Release</a></h3>
+
+
+
+<pre>
+void PfmApi::Release ( )
+</pre>
+
+<p>
+Free the interface instance and any associated resources.
+</p>
+
+
+<h3><a name="pfmapi-mountcreate"></a>PfmApi::MountCreate</a></h3>
+
+
+
+<pre>
+int /*error*/ PfmApi::MountCreate (
+   const <a href=#pfmmountcreateparams>PfmMountCreateParams</a>* params,
+   <a href=#pfmmount>PfmMount</a>**                  mount )
+</pre>
+
+<p>
+Create a new mount whose data will be served using the
+<a href=#arch-protocol>PFM Protocol</a> through the
+mountCreateParams.toFormatterWrite
+and mountCreateParams.fromFormatterRead pipes or socket.
+</p>
+<p>
+The params structure should be initialized as follows:
+</p>
+<pre>
+   PfmMountCreateParams params;
+   PfmMountCreateParams_Init(&amp;params); // C only.
+   params.mountSourceName = ...;
+   params.mountFlags |= ...;
+   params.toFormatterWrite = ...;
+   params.fromFormatterRead = ...;
+   ...
+</pre>
+<p>
+Applications that only want to initiate mounts, but not
+create their own virtual file systems, do not use this
+function. Instead they would use
+<a href=#pfmapi-filemountfactory>PfmApi::FileMountFactory</a> .
+</p>
+
+
+<h3><a name="pfmapi-mountsourcenameopen"></a>PfmApi::MountSourceNameOpen</a></h3>
+
+
+
+<pre>
+int /*error*/ PfmApi::MountSourceNameOpen (
+   const wchar_t* <a href=#appdev-mountsourcename>mountSourceName</a> ,
+   <a href=#pfmmount>PfmMount</a>**     mount )
+</pre>
+
+<p>
+Opens the mount with the specified mount source name. The mount
+source name is an arbitrary file-name formatted string supplied
+when the mount was created. Mounts created through
+<a href=#pfmapi-filemountfactory>PfmApi::FileMountFactory</a> use
+the name of the mounted container file as the mount source name.
+</p>
+
+
+<h3><a name="pfmapi-mountendnameopen"></a>PfmApi::MountEndNameOpen</a></h3>
+
+
+
+<pre>
+int /*error*/ PfmApi::MountEndNameOpen (
+   const wchar_t* <a href=#appdev-mountendname>mountEndName</a> ,
+   <a href=#pfmmount>PfmMount</a>**     mount )
+</pre>
+
+<p>
+Opens the mount with the specified mount end name. The mount end
+name is the unique PFM generated name for the mount, used for
+constructing the mount-point and UNC names.
+</p>
+
+
+<h3><a name="pfmapi-mountpointopen"></a>PfmApi::MountPointOpen</a></h3>
+
+
+
+<pre>
+int /*error*/ PfmApi::MountPointOpen (
+   const wchar_t* <a href=#appdev-mountpoint>mountPoint</a> ,
+   <a href=#pfmmount>PfmMount</a>**     mount )
+</pre>
+
+<p>
+Opens the mount at the specified mount point.
+</p>
+
+
+<h3><a name="pfmapi-mountidopen"></a>PfmApi::MountIdOpen</a></h3>
+
+
+
+<pre>
+int /*error*/ PfmApi::MountIdOpen (
+   int        <a href=#appdev-mountid>mountId</a> ,
+   <a href=#pfmmount>PfmMount</a>** mount )
+</pre>
+
+<p>
+Open the mount identified by the mountId parameter.
+The mountId parameter is typically retrieved from the
+<a href=#pfmmountiterator-next>PfmMountIterator::Next</a> function.
+</p>
+
+
+<h3><a name="pfmapi-mountiterate"></a>PfmApi::MountIterate</a></h3>
+
+
+
+<pre>
+int /*error*/ PfmApi::Iterate (
+   int64_t       <a href=#appdev-changeinstance>startChangeInstance</a> ,
+   int64_t*      <a href=#appdev-changeinstance>nextChangeInstance</a> ,
+   <a href=#pfmmountiterator>PfmMountIterator</a>** iterator )
+</pre>
+
+<p>
+This function creates and returns an instance of the
+<a href=#pfmmountiterator>PfmMountIterator</a> interface, which allows
+applications to query a complete or partial list of mounts.
+</p>
+<p>
+To iterate all mounts, zero should be passed for the startChangeInstance
+parameter.
+</p>
+<p>
+The nextChangeInstance parameter is the location to store the
+current change instance of the mount list that will be returned
+by the iterator. This change instance can be used as the
+startChangeInstance parameter in future calls to iterate
+only mounts that have changed.
+</p>
+
+
+<h3><a name="pfmapi-mountmonitorfactory"></a>PfmApi::MountMonitorFactory</a></h3>
+
+
+
+<pre>
+int /*error*/ PfmApi::MountMonitorFactory (
+   <a href=#pfmmountmonitor>PfmMountMonitor</a>** monitor )
+</pre>
+
+<p>
+This function creates and returns an instance of the
+<a href=#pfmmountmonitor>PfmMountMonitor</a> interface, which allows
+applications to efficiently maintain an updated list of
+all mounts and mount states.
+</p>
+
+
+<h3><a name="pfmapi-filemountfactory"></a>PfmApi::FileMountFactory</a></h3>
+
+
+
+<pre>
+int /*error*/ PfmApi::FileMountFactory (
+   <a href=#pfmfilemount>PfmFileMount</a>** fileMount )
+</pre>
+
+<p>
+Create a file mount interface to allow initiating a mount
+of a container file using a PFMAP formatter.
+</p>
+
+
+<h2><a name="pfmfilemount"></a>PfmFileMount interface</a></h2>
+
+
+
+<p>
+This interface allows applications to mount a container file system
+via a PFM Audit Package formatter. This interface is returned from
+the <a href=#pfmapi-filemountfactory>PfmApi::FileMountFactory</a>
+function.
+</p>
+
+
+<h3><a name="pfmfilemount-release"></a>PfmFileMount::Release</a></h3>
+
+
+
+<pre>
+void PfmFileMount::Release ( )
+</pre>
+
+<p>
+Free the interface instance and any associated resources.
+If the file mount has completed and was not detached, an
+unmount will be performed on the resulting mount.
+</p>
+
+
+<h3><a name="pfmfilemount-cancel"></a>PfmFileMount::Cancel</a></h3>
+
+
+
+<pre>
+void PfmFileMount::Cancel ( )
+</pre>
+
+<p>
+Asynchronously cancel the ongoing file mount operation and
+close any related user interface dialogs.
+</p>
+
+
+<h3><a name="pfmfilemount-start"></a>PfmFileMount::Start</a></h3>
+
+
+
+<pre>
+int /*error*/ PfmFileMount::Start (
+   const <a href=#pfmfilemountcreateparams>PfmFileMountCreateParams</a>* params )
+</pre>
+
+<p>
+Start a file mount operation. This will result in user
+interface dialogs being displayed as necessary.
+</p>
+<p>
+The params structure should be initialized as follows:
+</p>
+<pre>
+   PfmFileMountCreateParams params;
+   PfmFileMountCreateParams_Init(&amp;params); // C only
+   params.mountFileName = ...;
+   params.mountFlags |= ...;
+   params.fileMountFlags |= ...;
+   ...
+</pre>
+
+
+<h3><a name="pfmfilemount-send"></a>PfmFileMount::Send</a></h3>
+
+
+
+<pre>
+void PfmFileMount::Send (
+   const wchar_t* data,
+   int/*bool*/    newLine);
+</pre>
+
+<p>
+This function can be used to send data back to the formatter
+during authentication. This may be needed for user interface
+that is mounting formatters with authentication that require
+more than simple password queries.
+</p>
+
+
+<h3><a name="pfmfilemount-status"></a>PfmFileMount::Status</a></h3>
+
+
+
+<pre>
+void PfmFileMount::Status (
+   const wchar_t* data,
+   int/*bool*/    newLine )
+</pre>
+
+<p>
+This function is used to print mount status messages to the
+file mount user interface. It generally results in a matching
+call to <a href=#pfmfilemountui-status>PfmFileMountUi::Status</a> .
+Any status prefixed with the string "ERROR: " may be
+used as the message in the final error dialog that is displayed
+if the mount fails.
+</p>
+
+
+<h3><a name="pfmfilemount-waitready"></a>PfmFileMount::WaitReady</a></h3>
+
+
+
+<pre>
+int /*error*/ PfmFileMount::WaitReady ( )
+</pre>
+
+<p>
+This function will block until the mount operation completes
+successfully or fails due to an error or is cancelled.
+</p>
+
+
+<h3><a name="pfmfilemount-getmount"></a>PfmFileMount::GetMount</a></h3>
+
+
+
+<pre>
+PfmMount* PfmFileMount::GetMount ( )
+</pre>
+
+<p>
+This function returns an unreferenced ptr to the
+<a href=#pfmmount>PfmMount</a> object associated with a
+successful file mount operation. The caller is responsible
+to add a reference to the object if it will be using it
+beyond the lifetime of the PfmFileMount object. If called
+before the file mount is ready, or on a file mount that
+has failed, it will return null.
+</p>
+
+
+<h3><a name="pfmfilemount-detach"></a>PfmFileMount::Detach</a></h3>
+
+
+
+<pre>
+void PfmFileMount::Detach ( )
+</pre>
+
+<p>
+This function detaches a successful out-of-process file
+mount from the current process. This allows the mount to
+survive after the file mount object is releases and after
+the current process exits.
+</p>
+<p>
+If this function is called on an in-process file mount
+then it will block until an unmount occurs.
+</p>
+
+
+<h2><a name="pfmfilemountui"></a>PfmFileMountUi</a></h2>
+
+
+
+<p>
+This interface is implemented by applications that are performing
+file mount operations, to allow the display of a custom user
+interface.
+</p>
+
+
+<h3><a name="pfmfilemountui-start"></a>PfmFileMountUi::Start</a></h3>
+
+
+
+<pre>
+void PfmFileMountUi::Start ( )
+</pre>
+
+<p>
+</p>
+
+
+<h3><a name="pfmfilemountui-complete"></a>PfmFileMountUi::Complete</a></h3>
+
+
+
+<pre>
+void PfmFileMountUi::Complete (
+   const wchar_t* errorMessage )
+</pre>
+
+<p>
+</p>
+
+
+<h3><a name="pfmfilemountui-status"></a>PfmFileMountUi::Status</a></h3>
+
+
+
+<pre>
+void PfmFileMountUi::Status (
+   const wchar_t* data ,
+   int/*bool*/    newLine )
+</pre>
+
+<p>
+</p>
+
+
+<h3><a name="pfmfilemountui-querypassword"></a>PfmFileMountUi::QueryPassword</a></h3>
+
+
+
+<pre>
+const wchar_t* PfmFileMountUi::QueryPassword (
+   int count )
+</pre>
+
+<p>
+</p>
+
+
+<h3><a name="pfmfilemountui-clearpassword"></a>PfmFileMountUi::ClearPassword</a></h3>
+
+
+
+<pre>
+void PfmFileMountUi::ClearPassword ( )
+</pre>
+
+<p>
+</p>
+
+
+<h2><a name="pfmmount"></a>PfmMount interface</a></h2>
+
+
+
+<p>
+This interface allows applications to query information about, and
+control, an existing mount. This interface is returned from the
+<a href=#pfmapi-mountcreate>PfmApi::MountCreate</a>,
+<a href=#pfmapi-mountsourcenameopen>PfmApi::MountSourceNameOpen</a>,
+<a href=#pfmapi-mountendnameopen>PfmApi::MountWEndNameOpen</a>,
+<a href=#pfmapi-mountidopen>PfmApi::MountIdOpen</a>, and
+<a href=#pfmfilemount-getmount>PfmFileMount::GetMount</a>
+methods.
+</p>
+
+
+<h3><a name="pfmmount-release"></a>PfmMount::Release</a></h3>
+
+
+
+<pre>
+void PfmMount::Release ( )
+</pre>
+
+<p>
+Free the interface instance and any associated resources.
+</p>
+<p>
+Once this method is called, any previous data returned
+from this interface should no longer be used. In particular,
+any pointers to strings are no longer valid.
+</p>
+
+
+<h3><a name="pfmmount-refresh"></a>PfmMount::Refresh</a></h3>
+
+
+
+<pre>
+int /*error*/ PfmMount::Refresh ( )
+</pre>
+
+<p>
+Update to match any changes to the state of the mount.
+</p>
+<p>
+Once this method is called, any previous data returned
+from this interface should no longer be used. In particular,
+any pointers to strings will no longer be valid.
+</p>
+
+
+<h3><a name="pfmmount-unmount"></a>PfmMount::Unmount</a></h3>
+
+
+
+<pre>
+int /*error*/ PfmMount::Unmount (
+   int <a href=#pfmunmountflags>unmountFlags</a> )
+</pre>
+
+<p>
+End an existing file mount. The mount will remain
+visible through the <a href=#pfmapi-mountiterate>PfmApi::MountIterate</a>
+method until all PfmMount instances referring to the mount are
+released.
+</p>
+
+<h3><a name="pfmmount-getmountid"></a>PfmMount::GetMountId</a></h3>
+
+
+<pre>
+int /*<a href=#appdev-mountid>mountId</a>*/ PfmMount::GetMountId ( )
+</pre>
+
+
+<h3><a name="pfmmount-getmountflags"></a>PfmMount::GetMountFlags</a></h3>
+
+
+
+<pre>
+int /*<a href=#pfmmountflags>mountFlags</a>*/ PfmMount::GetMountFlags ( )
+</pre>
+
+
+<h3><a name="pfmmount-getstatusflags"></a>PfmMount::GetStatusFlags</a></h3>
+
+
+
+<pre>
+int /*<a href=#pfmstatusflags>statusFlags</a>*/ PfmMount::GetStatusFlags ( )
+</pre>
+
+
+<h3><a name="pfmmount-getvolumeflags"></a>PfmMount::GetVolumeFlags</a></h3>
+
+
+
+<pre>
+int /*<a href=#pfmvolumeflags>volumeFlags</a>*/ PfmMount::GetVolumeFlags ( )
+</pre>
+
+
+<h3><a name="pfmmount-getchangeinstance"></a>PfmMount::GetChangeInstance</a></h3>
+
+
+
+<pre>
+int64_t /*<a href=#appdev-changeinstance>changeInstance</a>*/ PfmMount::GetChangeInstance ( )
+</pre>
+
+
+<h3><a name="pfmmount-getmountsourcename"></a>PfmMount::GetMountSourceName</a></h3>
+
+
+
+<pre>
+const wchar_t* PfmMount::<a href=#appdev-mountsourcename>GetMountSourceName</a> ( )
+</pre>
+
+<p>
+The returned pointer to a string is only valid until the next call
+to the <a href=#pfmmount-refresh>PfmMount::Refresh</a> mathod or
+until the PfmMount instance is released.
+</p>
+
+
+<h3><a name="pfmmount-getmountendname"></a>PfmMount::GetMountEndName</a></h3>
+
+
+
+<pre>
+const wchar_t* PfmMount::<a href=#appdev-mountendname>GetMountEndName</a> ( )
+</pre>
+
+<p>
+The returned pointer to a string is only valid until the next call
+to the <a href=#pfmmount-refresh>PfmMount::Refresh</a> method or
+until the PfmMount instance is released.
+</p>
+
+
+<h3><a name="pfmmount-getmountpoint"></a>PfmMount::GetMountPoint</a></h3>
+
+
+
+<pre>
+const wchar_t* PfmMount::<a href=#appdev-mountpoint>GetMountPoint</a> ( )
+</pre>
+
+<p>
+The returned pointer to a string is only valid until the next call
+to the <a href=#pfmmount-refresh>PfmMount::Refresh</a> method or
+until the PfmMount instance is released.
+</p>
+
+
+<h3><a name="pfmmount-getuncname"></a>PfmMount::GetUncName</a></h3>
+
+
+
+<pre>
+const wchar_t* PfmMount::<a href=#appdev-uncname>GetUncName</a> ( )
+</pre>
+
+<p>
+The returned pointer to a string is only valid until the next call
+to the <a href=#pfmmount-refresh>PfmMount::Refresh</a> method or
+until the PfmMount instance is released.
+</p>
+
+
+<h3><a name="pfmmount-getdriveletter"></a>PfmMount::GetDriveLetter</a></h3>
+
+
+
+<pre>
+wchar_t PfmMount::GetDriveLetter ( )
+</pre>
+
+
+<h3><a name="pfmmount-getownerid"></a>PfmMount::GetOwnerId</a></h3>
+
+
+
+<pre>
+const wchar_t* PfmMount::GetOwnerId ( )
+</pre>
+
+<p>
+The returned pointer to a string is only valid until the next call
+to the <a href=#pfmmount-refresh>PfmMount::Refresh</a> method or
+until the PfmMount instance is released.
+</p>
+
+
+<h3><a name="pfmmount-getownername"></a>PfmMount::GetOwnerName</a></h3>
+
+
+
+<pre>
+const wchar_t* PfmMount::GetOwnerName ( )
+</pre>
+
+<p>
+The returned pointer to a string is only valid until the next call
+to the <a href=#pfmmount-refresh>PfmMount::Refresh</a> method or
+until the PfmMount instance is released.
+</p>
+
+
+<h3><a name="pfmmount-getformattername"></a>PfmMount::GetFormatterName</a></h3>
+
+
+
+<pre>
+const wchar_t* PfmMount::GetFormatterName ( )
+</pre>
+
+<p>
+The returned pointer to a string is only valid until the next call
+to the <a href=#pfmmount-refresh>PfmMount::Refresh</a> method or
+until the PfmMount instance is released.
+</p>
+
+
+<h3><a name="pfmmount-flush"></a>PfmMount::Flush</a></h3>
+
+
+
+<pre>
+int /*error*/ PfmMount::Flush ( )
+</pre>
+
+
+<h3><a name="pfmmount-control"></a>PfmMount::Control</a></h3>
+
+
+
+<pre>
+int /*error*/ PfmMount::Control (
+   int         controlCode ,
+   const void* input ,
+   size_t      inputSize ,
+   void*       output ,
+   size_t      maxOutputSize ,
+   size_t*     outputSize )
+</pre>
+
+<p>
+Send a server specific control code through to the server. Servers
+using <a href=#pfmmarshaller>PfmMarshaller</a> will see a the
+control code via a call to their implementation of
+<a href=#pfmformatterdispatch-control>PfmFormatterDispatch::Control</a> .
+</p>
+<p>
+Since control codes are server specific, applications must
+identify the server before sending control codes. This can
+be done using the
+<a href=#pfmmount-getformattername>PfmMount::GetFormatterName</a>
+method.
+</p>
+<p>
+Servers should number their control codes starting at zero or
+one and not leave gaps. The range of available control codes
+is limited and is not guaranteed to remain constant.
+</p>
+
+
+<h3><a name="pfmmount-waitready"></a>PfmMount::WaitReady</a></h3>
+
+
+
+<pre>
+int /*error*/ PfmMount::WaitReady (
+   int timeoutMsecs )
+</pre>
+
+<p>
+Wait for the mount to become ready.
+</p>
+
+
+<h2><a name="pfmmountiterator"></a>PfmMountIterator interface</a></h2>
+
+
+
+<p>
+This interface is returned from the
+<a href=#pfmapi-mountiterate>PfmApi::MountIterate</a> method.
+It allows applications to retrieve the
+mountId and current changeInstance of all file mounts.
+</p>
+
+
+<h3><a name="pfmmountiterator-release"></a>PfmMountIterator::Release</a></h3>
+
+
+
+<pre>
+void PfmMountIterator::Release ( )
+</pre>
+
+<p>
+Free the interface instance and any associated resources.
+</p>
+
+
+<h3><a name="pfmmountiterator-next"></a>PfmMountIterator::Next</a></h3>
+
+
+
+<pre>
+int /*<a href=#appdev-mountid>mountId</a>*/ PfmMountIterator::Next (
+   int64_t* <a href=#appdev-changeinstance>changeInstance</a> )
+</pre>
+
+
+<h2><a name="pfmmountmonitor"></a>PfmMountMonitor interface</a></h2>
+
+
+
+<p>
+This interface is returned from the
+<a href=#pfmapi-mountmonitorfactory>PfmApi::MountMonitorFactory</a> method. It allows
+applications to monitor for the creation and deletion of mounts.
+</p>
+
+
+<h3><a name="pfmmountmonitor-release"></a>PfmMountMonitor::Release</a></h3>
+
+
+
+<pre>
+void PfmMonitor::Release(void)
+</pre>
+
+<p>
+Free the interface instance and any associated resources.
+</p>
+
+
+<h3><a name="pfmmountmonitor-wait"></a>PfmMountMonitor::Wait</a></h3>
+
+
+
+<pre>
+int /*error*/ PfmMountMonitor::Wait (
+   int64_t <a href=#appdev-changeinstance>nextChangeInstance</a> ,
+   int     timeoutMsecs )
+</pre>
+
+<p>
+Wait for the change instance of the mount list to be
+different from the nextChangeInstance parameter, or until
+another thread calls the
+<a href=#pfmmountmonitor-cancel>PfmMountMonitor::Cancel</a> function.
+</p>
+
+
+<h3><a name="pfmmountmonitor-cancel"></a>PfmMountMonitor::Cancel</a></h3>
+
+
+
+<pre>
+void PfmMountMonitor::Cancel ( )
+</pre>
+
+<p>
+Return early from any calls to
+<a href=#pfmmountmonitor-wait>PfmMountMonitor::Wait</a> .
+</p>
+
+
+<h1><a name="fsdev"></a>File System Development</a></h1>
+<h2><a name="fsdev-start"></a>Getting Started</a></h2>
+
+
+<p>
+New file system server developers should first build and test one of
+the <a href=#kit-samples>samples</a> .
+</p>
+
+<h2><a name="fsdev-testing"></a>Testing</a></h2>
+
+
+<p>
+When debugging applications that are exposing PFM file system
+mounts, it is important that the debugger never access the
+PFM mount. If the debugger does access the PFM mount then it
+will deadlock. If a deadlock occurs, you can perform an unmount
+of the mount from another command prompt to get things moving
+again, but you will probably need to restart your debugging
+session. You also can kill the process to resolve a deadlock.
+</p>
+<p>
+The PfmMarshaller interface provides some built in tracing
+functionality that is useful during development. To see these
+traces you will need to download and install
+Pismo Trace Monitor, available on the Pismo Technic Inc. website,
+<a href="http://www.pismotechnic.com/">http://www.pismotechnic.com/</a> .
+</p>
+<p>
+You start the trace monitor on Windows using the
+"Start Menu - Programs - Pismo Trace Monitor" menu link, or
+by running tracemon.exe . New trace channels are hidden by
+default. You will need to use the unhide command from the
+trace monitor window menu to make channels visible. Do this
+after you have mounted a file.
+</p>
+<p>
+On Mac and Linux you can view traces using the tracecmd command
+line tools.
+</p>
+
+<h2><a name="fsdev-concepts"></a>Concepts</a></h2>
+<h3><a name="fsdev-errors"></a>Portable Errors</a></h3>
+
+
+
+<p>
+The <a href=#arch-protocol>PFM Protocol</a>
+and <a href=#pfmformatterdispatch>PfmFormatterDispatch</a> interface
+return portable errors such as pfmErrorAccessDenied. The other
+interfaces return system error codes such as ERROR_ACCESS_DENIED
+or EACCESS. The protocol is remotable and
+portable, so the use of system error codes is not appropriate.
+</p>
+
+
+<h3><a name="fsdev-file"></a>Folders are Files</a></h3>
+
+
+
+<p>
+The term file is regularly used in this document to mean file or
+folder. Unless stated otherwise, all
+<a href=#arch-protocol>PFM Protocol</a> requests and related
+marshalled methods work the same for files and folders.
+</p>
+
+
+<h3><a name="fsdev-names"></a>File Names</a></h3>
+
+
+
+<p>
+The <a href=#arch-protocol>PFM Protocol</a> represents all file names
+in UTF8. The marshaller converts UTF8 file names to and from wchar_t
+file names for use by the servers.
+</p>
+<p>
+The protocol and the driver support multiple named files, or hard
+links. Servers that support hard links make use of the client
+maintained parentFileId and endName in order to identify which name
+for a file is being manipulated.
+</p>
+<p>
+The protocol allows the server to return a case corrected spelling
+for the last element of the name of opened files. This case
+corrected name is used by the driver when emulating short name
+aliases (DOS 8.3 file names) on Windows. Short names are still used by
+many applications, most notably by portions of Windows itself.
+Servers that do not provide the case corrected end name will have
+reduced compatibility.
+</p>
+
+
+<h3><a name="openid"></a>OpenId and OpenSequence</a></h3>
+
+
+
+<p>
+OpenId and openSequence are integral parts of the
+<a href=#arch-protocol>PFM protocol</a>. The openId is the
+mechanism used to identify open files and folders. OpenSequence is
+maintained by the driver and used by the server to identify when
+the last reference to an open file or folder has closed.
+</p>
+<p>
+OpenIds are not file IDs. In particular the openId values for new
+files is assigned by the driver, where file IDs are assigned by the
+server.
+</p>
+<p>
+The use of openIds and openSequence allows PFM to provide atomicity
+guarantees during file system name space changes and share mode
+checks. Without this mechanism the driver would have to make
+assumptions about the servers name space, and hold locks while
+waiting for the server to process many requests.
+</p>
+
+
+<h3><a name="fsdev-delete"></a>Deleted Files</a></h3>
+
+
+
+<p>
+The <a href=#arch-protocol>PFM Protocol</a> handles file deletion
+using a unix model, where deletion applies to file names as opposed
+to underlying file data. After a file has been deleted, the file
+data must remain accessible until the file is finally closed.
+</p>
+<p>
+The unix file deletion model requires extra code for some
+servers. For other servers it is trivially supported.
+Regardless, it is a requirement for servers and is utilized by
+the client.
+</p>
+<p>
+Server developers should understand that the NT file system model is
+more complex than is apparent to casual users of the Win32 API.
+Using a unix model for file delete allows the client to achieve a
+high level of application compatibility in a more portable and
+supportable way than if the native NT delete model were directly
+supported by the protocol.
+</p>
+
+
+<h3><a name="fsdev-concurrency"></a>Concurrency</a></h3>
+
+
+
+<p>
+The Windows, Mac, and Linux kernels are massively multi-threaded.
+The <a href=#arch-kernel>PFM kernel module</a> runs in the kernel,
+and therefore must also be multi-threaded. Likewise, the
+<a href=#arch-protocol>PFM Protocol</a> used by the driver to
+communicate with servers supports requests being processed in
+parallel and in any order, so servers can also be implemented
+multi-threaded.
+</p>
+<p>
+Servers are not required to be multi-threaded. Both
+the PFM kernel module and the PFM protocol have been carefully
+designed to support multi-threaded servers and servers that
+serially process requests.
+</p>
+
+
+<h3><a name="pfmmarshallerops"></a>PfmMarshaller???Op objects</a></h3>
+
+
+
+<p>
+All the methods in PfmFormatterDispatch receive an "op" object as a
+parameter. The various methods all have a unique interface for the
+related op object. These op objects represent the request from the
+client that is being processed. The various request parameters are
+available via op object methods.
+</p>
+<p>
+All op objects have a Complete() method. The result for the
+associated request is returned to the client once the server calls
+the op->Complete() method. Once completed, the op object is freed
+and can no longer be used by the server.
+</p>
+<p>
+Single-threaded servers will generally call op->Complete() from the
+related PfmFormatterDispatch method, before returning to the
+marshaller. Multi-threaded or concurrent formatters may save the
+op object and complete it later from another thread or work queue.
+</p>
+
+
+<h3><a name="pfmformatterserializeopen"></a>PfmFormatterSerializeOpen</a></h3>
+
+
+
+<pre>
+interface PfmFormatterSerializeOpen
+{
+   void SerializeOpen (
+      int64_t  openId ,
+      int64_t* openSequence)
+}
+</pre>
+
+<p>
+Some op->Complete() methods take an optional
+PfmFormatterSerializeOpen object as a parameter. This interface can
+be implemented by servers to allow generation of proper openSequence
+values when requests are being completed concurrently from multiple
+threads. The marshaller calls the SerializeOpen methods in the order
+that results are being sent back to the client. When called, the
+server should increment the openSequence value for the related file
+and return the new value to the marshaller.
+</p>
+<p>
+If the server guarantees that it calls the related op->Complete()
+methods serially, either because the server is single-threaded or
+because the server uses its own serialization when completing
+requests, then this interface is redundant and does not need to be
+implemented. This is because the marshaller will send request
+results back to the client in the same order they are completed.
+</p>
+
+
+<h3><a name="pfmformatterops-open"></a>void* formatterUse</a></h3>
+
+
+
+<p>
+The C and C++ PfmFormatterDispatch methods also receive a
+formatter-use parameter. This is a pointer to a block of untyped
+memory associated with each request, that is available for use by
+the server. This can be useful to avoid extra heap memory allocation
+in concurrent servers. For example, it can be used to hold
+intrusive container links to facilitate storing op objects into
+queues.
+</p>
+
+
+<h2><a name="pfmmarshaller"></a>PfmMarshaller interface</a></h2>
+
+
+
+<p>
+This interface is used to convert the
+<a href=#arch-protocol>PFM Protocol</a> into the
+<a href=#pfmformatterdispatch>PfmFormatterDispatch</a> interface
+that is implemented by servers.
+
+
+<h3><a name="pfmmarshaller-factory"></a>PfmMarshallerFactory</a></h3>
+
+
+
+<pre>
+int /*error*/ PfmMarshallerFactory (
+   PfmMarshaller** marshaller )
+</pre>
+<p>
+This method creates an instance of the PfmMarshaller
+interface.
+</p>
+
+
+<h3><a name="pfmmarshaller-release"></a>PfmMarshaller::Release</a></h3>
+
+
+
+<pre>
+void PfmMarshaller::Release ( )
+</pre>
+<p>
+Servers should call this method when they are finished using an
+instance of the PfmMarshaller interface.
+</p>
+
+
+<h3><a name="pfmmarshaller-settrace"></a>PfmMarshaller::SetTrace</a></h3>
+
+
+
+<pre>
+void PfmMarshaller::SetTrace (
+   const wchar_t* traceChannelName )
+</pre>
+<p>
+Formaters can optionally call this method to
+initialize a diagnostic trace channel to help
+with testing and field troubleshooting.
+</p>
+<p>
+The Pismo Trace Monitor application must be
+installed to view the traces that are generated
+when this method is used. This applications
+is available on the Pismo Technic Inc. website,
+<a href="http://www.pismotechnic.com/">http://www.pismotechnic.com/</a>
+.
+</p>
+
+
+<h3><a name="pfmmarshaller-setstatus"></a>PfmMarshaller::SetStatus</a></h3>
+
+
+
+<pre>
+void PfmMarshaller::SetStatus (
+   HANDLE write )
+</pre>
+<p>
+Servers can call this method to set the handle (or file
+descriptor) of the pipe to which to send status text written
+using the status methods (Print, Vprintf, Printf, Line).
+</p>
+<p>
+The marshaller does not duplicate or reference the supplied
+handle. Servers must make a second call to this method,
+specifying INVALID_HANDLE_VALUE or -1.
+</p>
+
+
+<h3><a name="pfmmarshaller-convertsystemerror"></a>PfmMarshaller::ConvertSystemError</a></h3>
+
+
+
+<pre>
+int /*pfmError*/ PfmMarshaller::ConvertSystemError (
+   int error )
+</pre>
+<p>
+This method can optionally be used by servers to convert system
+errors (such as ERROR_OUTOFMEMORY or errnomem) to the equivalent
+<a href=#pfmerror>PFM error codes</a> needed with the
+<a href=#pfmformatterdispatch>PfmFormatterDispatch</a> interface.
+</p>
+
+
+<h3><a name="pfmmarshaller-getpassword"></a>PfmMarshaller::GetPassword</a></h3>
+
+
+
+<pre>
+int /*error*/ PfmMarshaller::GetPassword (
+   HANDLE          read ,
+   const wchar_t*  prompt ,
+   const wchar_t** password )
+</pre>
+<p>
+Servers that require passwords can use this method to query the
+user to enter a password. The prompt value is the text to display
+with the prompt, typically "user name:" or "password:". The
+returned password is valid until the next call to either
+PfmMarshaller::GetPassword or
+<a href=#pfmmarshaller-clearpassword>PfmMarshaller::ClearPassword</a> .
+</p>
+
+
+<h3><a name="pfmmarshaller-clearpassword"></a>PfmMarshaller::ClearPassword</a></h3>
+
+
+
+<pre>
+void PfmMarshaller::ClearPassword ( )
+</pre>
+<p>
+This method should be called after
+<a href=#pfmmarshaller-getpassword>PfmMarshaller::GetPassword</a>,
+when the returned password is no longer needed. This clears the
+password from system memory, reducing the chance that it will
+persist in the page file or appear in subsequent uninitialized
+memory allocations.
+</p>
+
+
+<h3><a name="pfmmarshaller-servedispatch"></a>PfmMarshaller::ServeDispatch</a></h3>
+
+
+
+<pre>
+void PfmMarshaller::ServeDispatch (
+   <a href=#pfmmarshallerserveparams>PfmMarshallerServeParams</a>* params )
+</pre>
+
+<p>
+This method is called by servers when they are ready to begin
+processing requests from the client. The method sends the
+<a href=#arch-protocol>PFM Protocol</a> ready string to the client,
+which with file mounts will result in the mount status dialog
+closing. It then goes into a loop, reading protocol requests from
+the client, calling the associated methods in the
+<a href=#pfmformatterdispatch>PfmFormatterDispatch</a>
+interface, and sending results back to the client.
+</p>
+<p>
+The method will return when the driver disconnects from the server
+by closing its end of the pipe/socket.
+</p>
+
+<p>
+The params structure should be initialized as follows:
+</p>
+<pre>
+   PfmMarshallerServeParams params;
+   PfmMarshallerServeParams_Init(&amp;params); // C only
+   params.dispatch = ...;
+   params.volumeFlags |= ...;
+   params.formatterName = ...;
+   params.toFormatterRead = ...;
+   params.fromFormatterWrite = ...;
+</pre>
+
+<p>
+The volumeFlags and formatterName parameters are provided to the client,
+which uses the information to satisfy volume information queries made by
+applications.
+</p>
+
+
+<h3><a name="pfmmarshaller-print"></a>PfmMarshaller::Print</a></h3>
+
+
+
+<pre>
+void PfmMarshaller::Print (
+   const wchar_t* data )
+</pre>
+<p>
+This method can be used by PFMAP formatters during identify and
+by servers during mount initialization, to send status data to the
+mount status dialog through the handle specified in an earlier call
+to <a href=#pfmmarshaller-setstatus>PfmMarshaller::SetStatus</a> .
+</p>
+<p>
+This method can be used during processing of requests
+from the driver to send traces to the trace channel
+specified in an earlier call to
+<a href=#pfmmarshaller-settrace>PfmMarshaller::SetTrace</a> .
+</p>
+
+
+<h3><a name="pfmmarshaller-vprintf"></a>PfmMarshaller::Vprintf</a></h3>
+
+
+
+<pre>
+void PfmMarshaller::Vprintf (
+   const wchar_t* format ,
+   va_list        args )
+</pre>
+<p>
+Similar to <a href=#pfmmarshaller-print>PfmMarshaller::Print</a> .
+</p>
+
+
+<h3><a name="pfmmarshaller-printf"></a>PfmMarshaller::Printf</a></h3>
+
+
+
+<pre>
+void PfmMarshaller::Printf (
+   const wchar_t* format ,
+   ... )
+</pre>
+<p>
+Similar to <a href=#pfmmarshaller-print>PfmMarshaller::Print</a> .
+</p>
+
+
+<h3><a name="pfmmarshaller-line"></a>PfmMarshaller::Line</a></h3>
+
+
+
+<pre>
+void PfmMarshaller::Line (
+   const wchar_t* data ,
+   int/*bool*/    newLine )
+</pre>
+<p>
+Similar to <a href=#pfmmarshaller-print>PfmMarshaller::Print</a> .
+</p>
+
+
+<h2><a name="pfmformatterdispatch"></a>PfmFormatterDispatch</a></h2>
+
+
+
+<p>
+This interface is implemented by servers, to process file system
+requests from the client that are marshalled through
+<a href=#pfmmarshaller-servedispatch>PfmMarshaller::ServeDispatch</a> .
+</p>
+
+
+<h3><a name="pfmformatterdispatch-open"></a>PfmFormatterDispatch::Open</a></h3>
+
+
+
+<pre>
+void PfmFormatterDispatch::Open (
+   PfmMarshallerOpenOp* <a href=#pfmmarshallerops>op</a> )
+
+interface PfmMarshallerOpenOp
+{
+   <a href=#pfmnamepart>PfmNamePart</a> const* NameParts ( )
+   size_t  NamePartCount ( )
+   int8_t  <a href=#pfmfiletype>CreateFileType</a> ( )
+   uint8_t <a href=#pfmfileflags>CreateFileFlags</a> ( )
+   int64_t <a href=#pfmtime>WriteTime</a> ( )
+   int64_t NewCreateOpenId ( )
+   int8_t  <a href=#pfmaccesslevel>ExistingAccessLevel</a> ( )
+   int64_t NewExistingOpenId ( )
+   void    Complete (
+      int                        <a href=#pfmerror>perr</a> ,
+      bool                       existed ,
+      <a href=#pfmopenattribs>PfmOpenAttribs</a> const*      openAttribs ,
+      int64_t                    parentFileId ,
+      wchar_t const*             endName ,
+      size_t                     linkNamePartCount ,
+      void const*                linkData ,
+      size_t                     linkDataSize ,
+      <a href=#pfmformatterserializeopen>PfmFormatterSerializeOpen</a>* serializeOpen )
+}
+</pre>
+
+<p>
+This method is called by the marshaller to process file
+open and create requests from the client. Correct use of
+newCreateOpenId parameter, the newExistingOpenId parameter,
+the existed result, the openAttribs->openId result, and the
+openAttribs->openSequence result, are critical to proper
+functioning of the atomicity guarantees provided by the
+client.
+</p>
+<p>
+If the server returns no error (0) then it must return
+the information about the newly opened/created file
+through the openAttribs parameter, the existed parameter,
+and optionally through the parentFileId parameter the endName
+parameter. All of the openAttribs->attribs fields must be filled.
+The four time fields in openAttribs->attribs should be
+filled with valid times, or with constant pfmTimeInvalid.
+</p>
+<p>
+The name of the file being opened is indicated by the nameParts
+and namePartCount parameters.
+</p>
+<p>
+If the server determines that the indicated file
+exists but has not already been opened then it must associate
+the client specified newExistingOpenId with the file, and
+return this same value in openAttribs->openId. The
+openAttribs->openSequence value must be initialized to a non
+zero positive value, and the value must be associated with
+the open file for use during subsequent close processing. The
+variable referenced by the existed parameter must be set to
+true.
+</p>
+<p>
+If the server determines that the indicated file is
+already open then it must return in openAttribs->openId the
+same openId that is already associated with the open file.
+The openAttribs->openSequence value must be initialized to a
+positive value that is greater than the openSequence returned
+by any previous open of the same file. The new openSequence
+value must be associated with the open file for use during
+subsequent close processing. The variable referenced by the
+existed parameter must be set to true.
+</p>
+<p>
+If the parent folder of the indicated file does not exist
+then the server should return pfmErrorParentNotFound.
+</p>
+<p>
+If the indicated file does not exist and the newCreateOpenId
+parameter is zero then the server should return
+pfmErrorNotFound.
+</p>
+<p>
+If the indicated file does not exist and the newCreateOpenId
+parameter is non-zero  then the server should create the
+file. The createFileType, createFileFlags, and writeTime
+parameters should be used to to initialize the new file. The
+server must associate the client specified newCreateOpenId
+with the file, and return this same value in
+openAttribs->openId. The openAttribs->openSequence value must
+be initialized to a non zero positive value, and the value
+must be associated with the open file for use during
+subsequent close processing. The variable referenced by the
+existed parameter must be set to false.
+</p>
+<p>
+If the server is opening a file with different spelling
+for the last name component than was specified by the client
+then it must return the correct spelling through the endName
+parameter.
+</p>
+<p>
+The openAttribs->accessLevel field should be filled with the
+highest access level currently available for the file. For most
+servers this field can always be initialized with
+pfmAccessWriteData. For redirectors, when opening existing files,
+the existingAccessLevel parameters can be used to avoid opening
+files with higher access levels than are needed for the current
+request.
+</p>
+
+
+<h3><a name="pfmformatterdispatch-replace"></a>PfmFormatterDispatch::Replace</a></h3>
+
+
+
+<pre>
+void PfmFormatterDispatch::Replace (
+   PfmMarshallerReplaceOp* <a href=#pfmmarshallerops>op</a> )
+
+interface PfmMarshallerReplaceOp
+{
+   int64_t            TargetOpenId ( )
+   int64_t            TargetParentFileId ( )
+   <a href=#pfmnamepart>PfmNamePart</a> const* TargetEndName ( )
+   uint8_t            <a href=#pfmfileflags>CreateFileFlags</a> ( )
+   int64_t            <a href=#pfmtime>WriteTime</a> ( )
+   int64_t            NewCreateOpenId ( )
+   void               Complete (
+      int                        <a href=#pfmerror>perr</a> ,
+      <a href=#pfmopenattribs>PfmOpenAttribs</a> const*      openAttribs ,
+      <a href=#pfmformatterserializeopen>PfmFormatterSerializeOpen</a>* serializeOpen )
+}
+</pre>
+
+<p>
+The marshaller calls this method when processing a
+replace request from the client. This request is made
+when an existing file is being replaced by a new file
+with the same name. The replaced file name becomes
+<a href=#fsdev-delete>deleted</a>.
+</p>
+<p>
+The file being replaced has already been opened and is
+identified with the targetOpenId parameter.
+</p>
+<p>
+If the target file type is a folder and the server
+does not support replace for folders then the server
+should return pfmErrorInvalid. Servers must
+support replace for files.
+</p>
+<p>
+If the target file type is a folder and the folder
+is not empty then the server should return
+pfmErrorNotEmpty.
+</p>
+<p>
+Servers that support multiple names for a single
+file (hard links) should use the targetParentFileId and
+targetEndName parameters to identify which name is
+being replaced.
+</p>
+<p>
+The createFileFlags and writeTime parameters should be
+used to initialize the new file. The file type is always
+the same as the target.
+</p>
+<p>
+The newCreateOpenId and openAttribs results
+should be treated the same as is described for the
+<a href=#pfmformatterdispatch-open>PfmFormatterDispatch::Open</a>
+method when a new file is created.
+</p>
+
+
+<h3><a name="pfmformatterdispatch-move"></a>PfmFormatterDispatch::Move</a></h3>
+
+
+
+<pre>
+void PfmFormatterDispatch::Move (
+   PfmMarshallerMoveOp* <a href=#pfmmarshallerops>op</a> )
+
+interface PfmMarshallerMoveOp
+{
+   int64_t            SourceOpenId ( )
+   int64_t            SourceParentFileId ( )
+   <a href=#pfmnamepart>PfmNamePart</a> const* SourceEndName ( )
+   <a href=#pfmnamepart>PfmNamePart</a> const* TargetNameParts ( )
+   size_t             TargetNamePartCount ( )
+   bool               DeleteSource ( )
+   int64_t            <a href=#pfmtime>WriteTime</a> ( )
+   int8_t             <a href=#pfmaccesslevel>ExistingAccessLevel</a> ( )
+   int64_t            NewExistingOpenId ( )
+   void               Complete (
+      int                        <a href=#pfmerror>perr</a> ,
+      bool                       existed ,
+      <a href=#pfmopenattribs>PfmOpenAttribs</a> const*      openAttribs ,
+      int64_t                    parentFileId ,
+      wchar_t const*             endName ,
+      size_t                     linkNamePartCount ,
+      void const*                linkData ,
+      size_t                     linkDataSize ,
+      <a href=#pfmformatterserializeopen>PfmFormatterSerializeOpen</a>* serializeOpen )
+}
+
+</pre>
+
+<p>
+This method is called by the marshaller to process move
+requests from the client. This request is made when a file
+is being renamed. Proper handling of the newExistingOpenId
+parameter, exists result, openAttribs->openId result, and
+openAttribs->openSequence result, are critical to proper
+functioning of the atomicity guarantees provided by the
+client.
+</p>
+<p>
+The sourceOpenId parameter specifies the previously opened
+file that is being renamed. The sourceParentFileId and
+sourceEndName parameters can be used by servers that
+support hard links to determine which name for the file is
+being renamed.
+</p>
+<p>
+The targetNameParts and targetNamePartCount parameters
+specified the new file name (target) for the file.
+</p>
+<p>
+If the parent folder of the target file name does not exist
+then the server should return pfmErrorParentNotFound.
+</p>
+<p>
+If a file already exists with the target file name, then
+the existing target file should be opened. In this case the
+source file is left unmodified and no rename or move operation
+is performed. The variable pointed to by the existed parameter
+must be set to true. The newExistingOpenId, openAttribs,
+parentFileId, and endName parameters should be used in the
+same manner as is described for the
+<a href=#pfmformatterdispatch-open>PfmFormatterDispatch::Open</a>
+method when an existing file is opened.
+</p>
+<p>
+If the source file name has been deleted then the move
+request is the equivalent of an undelete. Servers must
+support this for files, but can return
+pfmErrorInvalid for folders.
+</p>
+<p>
+If the deleteSource parameter is false, and the server
+does not determine that the source file name is
+<a href=#fsdev-delete>deleted</a>, then the move request is
+creating an additional name for the file (hard link).
+Servers that do not support hard links should fail the
+request with pfmErrorInvalid.
+</p>
+<p>
+If the server is able to create the new name for the
+file then updated information about the source file is
+returned through the openAttribs and parentFileId parameters,
+openAttribs->openId must contain sourceOpenId,
+openAttribs->openSequence must contain a value equal to or
+higher than the largest openSequence value returned in
+any previous open for the file. The variable pointed to by
+the existed parameter must be set to false.
+</p>
+
+
+<h3><a name="pfmformatterdispatch-movereplace"></a>PfmFormatterDispatch::MoveReplace</a></h3>
+
+
+
+<pre>
+void PfmFormatterDispatch::MoveReplace (
+   PfmMarshallerMoveReplaceOp )
+
+interface PfmMarshallerMoveReplaceOp
+{
+   int64_t            SourceOpenId ( )
+   int64_t            SourceParentFileId ( )
+   <a href=#pfmnamepart>PfmNamePart</a> const* SourceEndName ( )
+   int64_t            TargetOpenId ( )
+   int64_t            TargetParentFileId ( )
+   <a href=#pfmnamepart>PfmNamePart</a> const* TargetEndName ( )
+   bool               DeleteSource ( )
+   int64_t            <a href=#pfmtime>WriteTime</a> ( )
+   void               Complete (
+      int <a href=#pfmerror>perr</a> )
+}
+</pre>
+<p>
+The marshaller calls this method when processing a
+move-replace request from the client. This request is
+made when a an opened source file is being renamed to
+the same name as an opened target file. The replaced
+target file name becomes
+<a href=#fsdev-delete>deleted</a>.
+</p>
+<p>
+Some processing for this method is similar to
+<a href=#pfmformatterdispatch-replace>PfmFormatterDispatch::Replace</a>,
+except that the source file is guaranteed to exist since
+it is already open.
+</p>
+<p>
+Some processing for this method is similar to
+<a href=#pfmformatterdispatch-move>PfmFormatterDispatch::Move</a>,
+specifically with handling of <a href=#fsdev-delete>deleted</a>
+source files and the deleteSource parameter.
+</p>
+
+
+<h3><a name="pfmformatterdispatch-delete"></a>PfmFormatterDispatch::Delete</a></h3>
+
+
+
+<pre>
+void PfmFormatterDispatch::Delete (
+   PfmMarshallerDeleteOp* <a href=#pfmmarshallerops>op</a> )
+
+interface PfmMarshallerDeleteOp
+{
+   int64_t            OpenId ( )
+   int64_t            ParentFileId ( )
+   <a href=#pfmnamepart>PfmNamePart</a> const* EndName ( )
+   int64_t            <a href=#pfmtime>WriteTime</a> ( )
+   void               Complete (
+      int <a href=#pfmerror>perr</a> )
+}
+</pre>
+
+<p>
+The marshaller calls this method when processing a
+delete request from the client. This request is made
+when a file name is being
+<a href=#fsdev-delete>deleted</a>.
+</p>
+<p>
+Servers that support multiple file names for a
+single file (hard links) can use the parentFileId
+and endName parameters to identify which file name
+is being deleted.
+</p>
+
+
+<h3><a name="pfmformatterdispatch-close"></a>PfmFormatterDispatch::Close</a></h3>
+
+
+
+<pre>
+void PfmFormatterDispatch::Close (
+   PfmMarshallerCloseOp* <a href=#pfmmarshallerops>op</a> )
+
+interface PfmMarshallerCloseOp
+{
+   int64_t OpenId ( )
+   int64_t OpenSequence ( )
+   void Complete (
+      int <a href=#pfmerror>perr</a> )
+}
+</pre>
+
+<p>
+There is not a one to one correspondence between open and
+close requests. The client generates a close request when
+it believes what may be the last reference to an open file
+has been released. The server decides if the last
+reference is actually gone by comparing the openSequence
+parameter against the openSequence associated with the
+file on the most recent successful open.
+</p>
+<p>
+If the openSequence parameter is less than the
+openSequence of the file then the file is still open. The
+server should perform no action.
+</p>
+<p>
+If the openSequence parameter is greater than or equal to
+the openSequence of the file then the client no longer has
+any references to the file. The server can free
+resources associated with the open file.
+</p>
+<p>
+After all references to a file are gone, the server
+has the choice of forgetting the openId that was
+associated with the file, or saving the openId for use if
+the file is re-opened. Saving the openId may allow the client
+to re-associate cache data with the file.
+</p>
+<p>
+Errors from this method are ignored by the client.
+</p>
+
+
+<h3><a name="pfmformatterdispatch-flushfile"></a>PfmFormatterDispatch::FlushFile</a></h3>
+
+
+
+<pre>
+void PfmFormatterDispatch::FlushFile (
+   PfmMarshallerFlushFileOp* <a href=#pfmmarshallerops>op</a> )
+
+interface PfmMarshallerFlushFileOp
+{
+   int64_t     OpenId ( )
+   uint8_t     <a href=#pfmflushflags>FlushFlags</a> ( )
+   uint8_t     <a href=#pfmfileflags>FileFlags</a> ( )
+   uint8_t     <a href=#pfmcolor>Color</a> ( )
+   int64_t     <a href=#pfmtime>CreateTime</a> ( )
+   int64_t     <a href=#pfmtime>AccessTime</a> ( )
+   int64_t     <a href=#pfmtime>WriteTime</a> ( )
+   int64_t     <a href=#pfmtime>ChangeTime</a> ( )
+   void const* LinkData ( )
+   unsigned    LinkDataSize ( )
+   void        Complete (
+      int                        <a href=#pfmerror>perr</a> ,
+      <a href=#pfmopenattribs>PfmOpenAttribs</a> const*      openAttribs ,
+      <a href=#pfmformatterserializeopen>PfmFormatterSerializeOpen</a>* serializeOpen )
+}
+</pre>
+
+<p>
+Updated attributes for modified files are supplied to the
+server in the flush file request.
+</p>
+<p>
+If the fileFlags parameter is the value pfm<a href=#pfmfileflags>FileFlags</a>Invalid then
+the server should skip updating the file flags.
+</p>
+<p>
+If any of the time parameters are the value pfmTimeInvald
+then the server should skip updating the associated
+time value.
+</p>
+<p>
+Errors returned from this method may be logged, but are otherwise
+ignored by the client.
+</p>
+
+
+<h3><a name="pfmformatterdispatch-list"></a>PfmFormatterDispatch::List</a></h3>
+
+
+
+<pre>
+void PfmFormatterDispatch::List (
+   PfmMarshallerDispatchOp* <a href=#pfmmarshallerops>op</a> )
+
+interface PfmMarshallerListOp
+{
+   int64_t        OpenId ( )
+   int64_t        ListId ( )
+   bool /*added*/ Add (
+      <a href=#pfmattribs>PfmAttribs</a> const* attribs ,
+      wchar_t const*    endName )
+   bool /*added*/ Add8 (
+      <a href=#pfmattribs>PfmAttribs</a> const* attribs ,
+      char const*       endName )
+   void           Complete (
+      int  <a href=#pfmerror>perr</a> ,
+      bool noMore )
+}
+</pre>
+
+<p>
+This method is called by the marshaller to generate
+list results for the contents of folders.
+</p>
+<p>
+The behavior of this method for non-folder files is
+undefined. Servers are free to handle this in whatever
+way is convenient.
+</p>
+<p>
+The server must create and maintain state information
+for each unique listId parameter that is used to list
+contents of a folder. The server should create this
+state when it sees a new listId. The server frees this
+state when it receives a call to
+<a href=#pfmformatterdispatch-listend>PfmFormatterDispatch::ListEnd</a>
+with a matching openId/listId, or when it frees
+resources associated with an open folder while
+processing a call to
+<a href=#pfmformatterdispatch-close>PfmFormatterDispatch::Close</a>
+for the same openId.
+</p>
+<p>
+Folder contents are added to the results by repeatedly
+calling the op->Add() or op->Add8() methods.
+</p>
+
+
+<h3><a name="pfmformatterdispatch-listend"></a>PfmFormatterDispatch::ListEnd</a></h3>
+
+
+
+<pre>
+void PfmFormatterDispatch::ListEnd (
+   PfmMarshallerListEndOp* <a href=#pfmmarshallerops>op</a> )
+
+interface PfmMarshallerListEndOp
+{
+   int64_t OpenId ( )
+   int64_t ListId ( )
+   void    Complete (
+      int <a href=#pfmerror>perr</a> )
+}
+</pre>
+
+<p>
+See
+<a href=#pfmformatterdispatch-list>PfmFormatterDispatch::List</a>.
+</p>
+
+
+<h3><a name="pfmformatterdispatch-read"></a>PfmFormatterDispatch::Read</a></h3>
+
+
+
+<pre>
+void PfmFormatterDispatch::Read (
+   PfmMarshallerReadOp* <a href=#pfmmarshallerops>op</a> )
+
+interface PfmMarshallerReadOp
+{
+   int64_t  OpenId ( )
+   uint64_t FileOffset ( )
+   void*    Data ( )
+   size_t   RequestedSize ( )
+   void     Complete (
+      int    <a href=#pfmerror>perr</a> ,
+      size_t actualSize )
+}
+</pre>
+
+<p>
+The behavior of this method for folders is undefined. Servers
+are free to handle this in whatever way is convenient.
+</p>
+
+
+<h3><a name="pfmformatterdispatch-write"></a>PfmFormatterDispatch::Write</a></h3>
+
+
+
+<pre>
+void PfmFormatterDispatch::Write (
+   PfmMarshallerWriteOp* <a href=#pfmmarshallerops>op</a> )
+
+interface PfmMarshallerWriteOp
+{
+   int64_t     OpenId ( )
+   uint64_t    FileOffset ( )
+   void const* Data ( )
+   size_t      RequestedSize ( )
+   void        Complete (
+      int <a href=#pfmerror>perr</a> ,
+      size_t actualSize )
+}
+</pre>
+
+<p>
+The behavior of this method for folders is undefined.
+Servers are free to handle this in whatever way is convenient.
+</p>
+<p>
+The behavior of zero length writes is undefined. Servers
+are free to handle this in whatever way is convenient.
+</p>
+
+
+<h3><a name="pfmformatterdispatch-setsize"></a>PfmFormatterDispatch::SetSize</a></h3>
+
+
+
+<pre>
+void PfmFormatterDispatch::SetSize (
+   PfmMarshallerSetSizeOp* <a href=#pfmmarshallerops>op</a> )
+
+interface PfmMarshallerSetSizeOp
+{
+   int64_t  OpenId ( )
+   uint64_t FileSize ( )
+   void     Complete (
+      int <a href=#pfmerror>perr</a> )
+}
+</pre>
+
+
+<h3><a name="pfmformatterdispatch-capacity"></a>PfmFormatterDispatch::Capacity</a></h3>
+
+
+
+<pre>
+void PfmFormatterDispatch::Capacity (
+   PfmMarshallerCapacityOp* <a href=#pfmmarshallerops>op</a> )
+
+struct/*interface*/ PfmMarshallerCapacityOp
+{
+   int64_t OpenId ( )
+   void    Complete (
+      int      <a href=#pfmerror>perr</a> ,
+      uint64_t totalCapacity ,
+      uint64_t availableCapacity )
+}
+</pre>
+
+
+<h3><a name="pfmformatterdispatch-flushmedia"></a>PfmFormatterDispatch::FlushMedia</a></h3>
+
+
+
+<pre>
+void PfmFormatterDispatch::FlushMedia (
+   PfmMarshallerFlushMediaOp* <a href=#pfmmarshallerops>op</a> )
+
+struct/*interface*/ PfmMarshallerFlushMediaOp
+{
+   void Complete (
+      int <a href=#pfmerror>perr</a> ,
+      int msecFlushDelay )
+}
+</pre>
+
+<p>
+The client will generate a flush media request shortly
+after a preiod of inactivity (~2 seconds). The server
+can use this request to perform whatever updates are
+applicable based on the file system characteristics.
+</p>
+<p>
+If the last request was a media flush then the client
+will wait the previously returned delay before sending
+another media flush.
+</p>
+<p>
+Errors returned from this method may be logged, but are otherwise
+ignored by the client.
+</p>
+
+
+<h3><a name="pfmformatterdispatch-control"></a>PfmFormatterDispatch::Control</a></h3>
+
+
+
+<pre>
+void PfmFormatterDispatch::Control (
+   PfmMarshallerControlOp* <a href=#pfmmarshallerops>op</a> )
+
+interface PfmMarshallerControlOp
+{
+   int64_t     OpenId ( )
+   int8_t      <a href=#pfmaccesslevel>AccessLevel</a> ( )
+   int         ControlCode ( )
+   void const* Input ( )
+   size_t      InputSize ( )
+   void*       Output ( )
+   size_t      MaxOutputSize ( )
+   void        Complete (
+      int    <a href=#pfmerror>perr</a> ,
+      size_t outputSize )
+}
+</pre>
+
+
+<h3><a name="pfmformatterdispatch-mediainfo"></a>PfmFormatterDispatch::MediaInfo</a></h3>
+
+
+
+<pre>
+void PfmFormatterDispatch::MediaInfo (
+   PfmMarshallerMediaInfoOp* <a href=#pfmmarshallerops>op</a> )
+
+interface PfmMarshallerMediaInfoOp
+{
+   int64_t               OpenId ( )
+   void Complete (
+      int                 <a href=#pfmerror>perr</a> ,
+      <a href=#pfmmediainfo>PfmMediaInfo</a> const* mediaInfo ,
+      wchar_t const*      mediaLabel )
+}
+</pre>
+
+<p>
+The client sends a media info request to retrieve media
+identification information such as media label and media
+id. Servers are free to fail this request, or to return
+only partial information. The returned information can
+be accessed by client applications using the Win32
+GetVolumeInformation() system call.
+</p>
+<p>
+The supplied open ID may be zero, or may be the id of an
+open file or folder. The server is free to ignore the
+open id or to return different information based on what
+file or folder the open id refers to.
+</p>
+
+
+<h3><a name="pfmformatterdispatch-access"></a>PfmFormatterDispatch::Access</a></h3>
+
+
+
+<pre>
+void PfmFormatterDispatch::Access (
+   PfmMarshallerAccessOp* <a href=#pfmmarshallerops>op</a> )
+
+interface PfmMarshallerAccessOp
+{
+   int64_t OpenId ( )
+   int8_t  <a href=#pfmaccesslevel>AccessLevel</a> ( )
+   void    Complete (
+      int                        <a href=#pfmerror>perr</a> ,
+      <a href=#pfmopenattribs>PfmOpenAttribs</a> const*      openAttribs ,
+      <a href=#pfmformatterserializeopen>PfmFormatterSerializeOpen</a>* serializeOpen )
+}
+</pre>
+
+<p>
+This method is called by the marshaller when a higher access level
+is needed for an open file.
+</p>
+<p>
+The openAttribs result should be treated the same as is described
+for the
+<a href=#pfmformatterdispatch-open>PfmFormatterDispatch::Open</a>
+method when an existing file is opened.
+</p>
+
+
+<h3><a name="pfmformatterdispatch-readxattr"></a>PfmFormatterDispatch::ReadXattr</a></h3>
+
+
+
+<pre>
+void PfmFormatterDispatch::ReadXattr (
+   PfmMarshallerReadXattrOp* <a href=#pfmmarshallerops>op</a> )
+
+interface PfmMarshallerReadXattrOp
+{
+   int64_t            OpenId ( )
+   <a href=#pfmnamepart>PfmNamePart</a> const* Name ( )
+   unsigned           Offset ( )
+   void*              Data ( )
+   size_t             RequestedSize ( )
+   void               Complete (
+      int <a href=#pfmerror>perr</a> ,
+      unsigned xattrSize ,
+      size_t transferredSize )
+}
+</pre>
+
+
+<h3><a name="pfmformatterdispatch-writexattr"></a>PfmFormatterDispatch::WriteXattr</a></h3>
+
+
+
+<pre>
+void PfmFormatterDispatch::WriteXattr (
+   PfmMarshallerWriteXattrOp* <a href=#pfmmarshallerops>op</a> )
+
+interface PfmMarshallerWriteXattrOp
+{
+   int64_t            OpenId ( )
+   <a href=#pfmnamepart>PfmNamePart</a> const* Name ( )
+   unsigned           XattrSize ( )
+   unsigned           Offset ( )
+   void const*        Data ( )
+   size_t             RequestedSize ( )
+   void               Complete (
+      int <a href=#pfmerror>perr</a> ,
+      size_t transferredSize )
+}
+</pre>
+
+
+<h2><a name="fsdev-datatypes"></a>Data Types</a></h2>
+<h3><a name="pfmmountflags"></a>mountFlags</a></h3>
+
+
+
+<ul>
+<li>pfmMountFlagReadOnly (0x00000001)</li>
+<li>pfmMountFlagWorldRead (0x00000004)</li>
+<li>pfmMountFlagWorldWrite (0x00000008)</li>
+<li>pfmMountFlagUncOnly (0x00000010)</li>
+<li>pfmMountFlagVerbose  (0x00000020)</li>
+<li>pfmMountFlagForceUnbuffered (0x00000080)</li>
+<li>pfmMountFlagForceBuffered (0x00000100)</li>
+<li>pfmMountFlagGroupRead (0x00000400)</li>
+<li>pfmMountFlagGroupWrite (0x00000800)</li>
+<li>pfmMountFlagGroupOwned (0x00001000)</li>
+<li>pfmMountFlagWorldOwned (0x00002000)</li>
+<li>pfmMountFlagCacheNameSpace (0x00004000)</li>
+<li>pfmMountFlagBrowse (0x00010000)</li>
+<li>pfmMountFlagUnmountOnRelease (0x00020000)</li>
+<li>pfmMountFlagUnmountOnDisconnect (0x00040000)</li>
+<li>pfmMountFlagLocalDriveType (0x00080000)</li>
+</ul>
+
+
+<h3><a name="pfmunmountflags"></a>unmountFlags</a></h3>
+
+
+
+<ul>
+<li>pfmUnmountFlagAsync (0x0001)
+</li>
+</ul>
+
+
+<h3><a name="pfmstatusflags"></a>statusFlags</a></h3>
+
+
+
+<ul>
+<li>pfmStatusFlagInitializing (0x0001)</li>
+<li>pfmStatusFlagReady (0x0002)</li>
+<li>pfmStatusFlagUnexpectedDisconnect (0x0004)</li>
+<li>pfmStatusFlagClosed (0x0008)</li>
+</ul>
+
+
+<h3><a name="pfmerror"></a>pfmError</a></h3>
+
+
+
+<ul>
+<li>pfmErrorSuccess (0)</li>
+<li>pfmErrorDisconnect (1)</li>
+<li>pfmErrorCancelled (2)</li>
+<li>pfmErrorUnsupported (3)</li>
+<li>pfmErrorInvalid (4)</li>
+<li>pfmErrorAccessDenied (5)</li>
+<li>pfmErrorOutOfMemory (6)</li>
+<li>pfmErrorFailed (7)</li>
+<li>pfmErrorNotFound (8)</li>
+<li>pfmErrorParentNotFound (9)</li>
+<li>pfmErrorExists (10)</li>
+<li>pfmErrorNoSpace (11)</li>
+<li>pfmErrorBadName (12)</li>
+<li>pfmErrorNotEmpty (13)</li>
+<li>pfmErrorEndOfData (14)</li>
+<li>pfmErrorNotAFile (15)</li>
+<li>pfmErrorDeleted (16)</li>
+<li>pfmErrorCorruptData (17)</li>
+<li>pfmErrorTimeout (18)</li>
+<li>pfmErrorNotAFolder (19)</li>
+</ul>
+
+
+<h3><a name="pfmfilemountflags"></a>fileMountFlags</a></h3>
+
+
+
+<ul>
+<li>pfmFileMountFlagConsoleUi (0x0001)</li>
+<li>pfmFileMountFlagInProcess (0x0002)</li>
+<li>pfmFileMountFlagVerbose (0x0004)</li>
+<li>pfmFileMountFlagEditOptions (0x0020)</li>
+<li>pfmFileMountFlagMultiMount (0x0040)</li>
+</ul>
+
+
+<h3><a name="pfmfiletype"></a>fileType</a></h3>
+
+
+
+<ul>
+<li>pfmFileTypeNone (0)</li>
+<li>pfmFileTypeFile (1)</li>
+<li>pfmFileTypeFolder (2)</li>
+<li>pfmFileTypeSymlink (3)</li>
+</ul>
+
+
+<h3><a name="pfmfileflags"></a>fileFlags</a></h3>
+
+
+
+<ul>
+<li>pfmFileFlagsInvalid (0xFF)</li>
+<li>pfmFileFlagReadOnly (0x01)</li>
+<li>pfmFileFlagHidden (0x02)</li>
+<li>pfmFileFlagSystem (0x04)</li>
+<li>pfmFileFlagExecute (0x08)</li>
+<li>pfmFileFlagHasIcon (0x10)</li>
+<li>pfmFileFlagAlias (0x40)</li>
+</ul>
+
+
+<h3><a name="pfmcolor"></a>color</a></h3>
+
+
+
+<ul>
+<li>pfmColorInvalid (0)</li>
+<li>pfmColorDefault (1)</li>
+<li>pfmColorGray (2)</li>
+<li>pfmColorGreen (3)</li>
+<li>pfmColorPurple (4)</li>
+<li>pfmColorBlue (5)</li>
+<li>pfmColorYellow (6)</li>
+<li>pfmColorRed (7)</li>
+<li>pfmColorOrange (8)</li>
+</ul>
+
+
+<h3><a name="pfmtime"></a>time</a></h3>
+
+
+
+<p>
+All file times used in the <a href=#arch-protocol>PFM Protocol</a>
+and with the <a href=#pfmformatterdispatch>PfmFormatterDispatch</a> interface
+are in the Windows FILETIME format, 64 bit count of 100 nano
+second units since Jan 1 1601 UTC.
+</p>
+<ul>
+<li>pfmTimeInvalid (0)
+</li>
+</ul>
+
+
+<h3><a name="pfmaccesslevel"></a>accessLevel</a></h3>
+
+
+
+<ul>
+<li>pfmAccessLevelReadInfo (1)</li>
+<li>pfmAccessLevelReadData (2)</li>
+<li>pfmAccessLevelWriteInfo (3)</li>
+<li>pfmAccessLevelDelete (4)</li>
+<li>pfmAccessLevelWriteData (5)</li>
+<li>pfmAccessLevelOwner (6)</li>
+</ul>
+
+
+<h3><a name="pfmvolumeflags"></a>volumeFlags</a></h3>
+
+
+
+<ul>
+<li>pfmVolumeFlagReadOnly (0x0001)</li>
+<li>pfmVolumeFlagCompressed (0x0002)</li>
+<li>pfmVolumeFlagEncrypted (0x0004)</li>
+<li>pfmVolumeFlagCaseSensitive (0x0008)</li>
+<li>pfmVolumeFlagTouchMap (0x0010)</li>
+<li>pfmVolumeFlagNoCreateTime (0x0100)</li>
+<li>pfmVolumeFlagNoAccessTime (0x0200)</li>
+<li>pfmVolumeFlagNoWriteTime (0x0400)</li>
+<li>pfmVolumeFlagNoChangeTime (0x0800)</li>
+<li>pfmVolumeFlagXattr (0x1000)</li>
+<li>pfmVolumeFlagSymlinks (0x2000)</li>
+<li>pfmVolumeFlagFakeNamedStreams (0x4000)</li>
+</ul>
+
+
+<h3><a name="pfmflushflags"></a>flushFlags</a></h3>
+
+
+
+<ul>
+<li>pfmFlushFlagOpen (0x0001)</li>
+</ul>
+
+
+<h3><a name="pfmattribs"></a>PfmAttribs</a></h3>
+
+
+
+<pre>
+struct PfmAttribs
+{
+   int8_t   <a href=#pfmfiletype>fileType</a>
+   uint8_t  <a href=#pfmfileflags>fileFlags</a>
+   int64_t  fileId
+   uint64_t fileSize
+   int64_t  <a href=#pfmtime>createTime</a>
+   int64_t  <a href=#pfmtime>accessTime</a>
+   int64_t  <a href=#pfmtime>writeTime</a>
+   int64_t  <a href=#pfmtime>changeTime</a>
+}
+</pre>
+
+
+<h3><a name="pfmopenattribs"></a>PfmOpenAttribs</a></h3>
+
+
+
+<pre>
+struct PfmOpenAttribs
+{
+   int64_t    <a href=#openid>openId</a>
+   int64_t    <a href=#openid>openSequence</a>
+   int8_t     <a href=#pfmaccesslevel>accessLevel</a>
+   <a href=#pfmattribs>PfmAttribs</a> attribs
+}
+</pre>
+
+
+<h3><a name="pfmnamepart"></a>PfmNamePart</a></h3>
+
+
+
+<pre>
+struct PfmNamePart
+{
+   const wchar_t* name
+   size_t         len
+   const char*    name8
+   size_t         len8
+}
+</pre>
+
+<p>
+This structure only used in the C and C++ API. For other
+programming languages, the native string type is used.
+</p>
+<p>
+The name8 field points to a UTF8 string, not to an
+ANSI or OEM codepage string.
+</p>
+<p>
+The name and name8 fields point to the same string
+in two different encodings. Formatters should use
+the name that is most convenient. Both names are
+zero terminated with the length available in the
+respective len field.
+</p>
+<p>
+
+
+<h3><a name="pfmmediainfo"></a>PfmMediaInfo</a></h3>
+
+
+
+<pre>
+struct PfmMediaInfo
+{
+   GUID     mediaUuid
+   uint64_t mediaId64
+   uint32_t mediaId32
+   uint8_t  mediaFlags
+   int64_t  createTime
+}
+</pre>
+
+
+<h3><a name="pfmfilemountcreateparams"></a>PfmFileMountCreateParams</a></h3>
+
+
+
+<pre>
+struct PfmFileMountCreateParams
+{
+   const wchar_t* mountFileName
+   int            <a href=#pfmmountflags>mountFlags</a>
+   int            <a href=#pfmfilemountflags>fileMountFlags</a>
+   wchar_t        driveLetter
+   const wchar_t* password
+   <a href=#pfmfilemountui>PfmFileMountUi</a>* ui
+}
+</pre>
+
+
+<h3><a name="pfmmountcreateparams"></a>PfmMountCreateParams</a></h3>
+
+
+
+<pre>
+struct PfmMountCreateParams
+{
+   const wchar_t* mountFileName
+   int            <a href=#pfmmountflags>mountFlags</a>
+   wchar_t        driveLetter
+   HANDLE         toFormatterWrite
+   HANDLE         fromFormatterRead
+}
+</pre>
+
+
+<h3><a name="pfmmarshallerserveparams"></a>PfmMarshallerServeParams</a></h3>
+
+
+
+<pre>
+struct PfmMarshallerServeParams
+{
+   <a href=#pfmformatterdispatch>PfmFormatterDispatch</a>* dispatch
+   int                   <a href=#pfmvolumeflags>volumeFlags</a>
+   const char*           formatterName
+   HANDLE                toFormatterRead
+   HANDLE                fromFormatterWrite
+}
+</pre>
+
+
+
+</body>
+</html>
