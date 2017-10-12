@@ -29,8 +29,8 @@
     <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="pfmclr_184">
-      <HintPath>..\..\clr\pfmclr_184.dll</HintPath>
+    <Reference Include="pfmclr_185">
+      <HintPath>..\..\clr\pfmclr_185.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

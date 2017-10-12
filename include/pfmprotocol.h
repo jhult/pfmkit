@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-// Copyright 2005-2016 Joe Lowe
+// Copyright 2005-2017 Joe Lowe
 //
 // Permission is granted to any person obtaining a copy of this Software,
 // to deal in the Software without restriction, including the rights to use,
@@ -175,7 +175,8 @@ PT_TYPE_DEFINE(FspMsgVersion)
    FspMsgHeader header;
    PT_UINT16LE clientVersion;
    PT_UINT16LE clientFlags;
-   PT_UINT32LE reserved[1];
+   PT_UINT8 clientFileNameType;
+   PT_UINT8 reserved[3];
 };
 
 PT_TYPE_DEFINE(FspMsgVersionResult)

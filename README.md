@@ -1,7 +1,7 @@
 
-Pismo File Mount Development Kit build 184
+Pismo File Mount Development Kit build 185
 Pismo Technic Inc. Copyright 2006-2017 Joe Lowe
-2017.01.04
+2017.06.23
 http://www.pismotechnic.com/
 
 
@@ -24,7 +24,12 @@ Features
 Release History
 ---------------
 
--- Build 184 - 2016.07.05
+-- build 185 - 2017.06.23
+
+Added PFM marshaller support for file name conversions between
+windows and mac/linux.
+
+-- Build 184 - 2016.01.05
 
 Fixed java API shim, not loading JNI DLL correctly.
 

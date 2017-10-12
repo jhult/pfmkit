@@ -36,27 +36,27 @@
 #define PFM_COPYRIGHT               Pismo Technic Inc. Copyright 2006-2017 Joe Lowe
 #define PFM_COPYRIGHTA             "Pismo Technic Inc. Copyright 2006-2017 Joe Lowe"
 #define PFM_COPYRIGHTW            L"Pismo Technic Inc. Copyright 2006-2017 Joe Lowe"
-#define PFM_DATE                    2017.01.04
-#define PFM_DATEA                  "2017.01.04"
-#define PFM_DATEW                 L"2017.01.04"
-#define PFM_BUILDTAG                pfm.1.0.0.184
-#define PFM_BUILDTAGA              "pfm.1.0.0.184"
-#define PFM_BUILDTAGW             L"pfm.1.0.0.184"
-#define PFM_BUILD                   184
-#define PFM_BUILDA                 "184"
-#define PFM_BUILDW                L"184"
+#define PFM_DATE                    2017.06.23
+#define PFM_DATEA                  "2017.06.23"
+#define PFM_DATEW                 L"2017.06.23"
+#define PFM_BUILDTAG                pfm.1.0.0.185
+#define PFM_BUILDTAGA              "pfm.1.0.0.185"
+#define PFM_BUILDTAGW             L"pfm.1.0.0.185"
+#define PFM_BUILD                   185
+#define PFM_BUILDA                 "185"
+#define PFM_BUILDW                L"185"
 #define PFM_PREFIX                  pfm
 #define PFM_PREFIXA                "pfm"
 #define PFM_PREFIXW               L"pfm"
 #define PFM_APIID                   pfmapi
 #define PFM_APIIDA                 "pfmapi"
 #define PFM_APIIDW                L"pfmapi"
-#define PFM_APIBASENAME             pfmapi_184
-#define PFM_APIBASENAMEA           "pfmapi_184"
-#define PFM_APIBASENAMEW          L"pfmapi_184"
-#define PFM_KERNELBASENAME          pfmfs_184
-#define PFM_KERNELBASENAMEA        "pfmfs_184"
-#define PFM_KERNELBASENAMEW       L"pfmfs_184"
+#define PFM_APIBASENAME             pfmapi_185
+#define PFM_APIBASENAMEA           "pfmapi_185"
+#define PFM_APIBASENAMEW          L"pfmapi_185"
+#define PFM_KERNELBASENAME          pfmfs_185
+#define PFM_KERNELBASENAMEA        "pfmfs_185"
+#define PFM_KERNELBASENAMEW       L"pfmfs_185"
 #define PFM_CMDBASENAME             pfm
 #define PFM_CMDBASENAMEA           "pfm"
 #define PFM_CMDBASENAMEW          L"pfm"
@@ -149,9 +149,15 @@ static const int8_t pfmAccessLevelOwner = 6;
 
 static const uint8_t pfmControlFlagForceUnbuffered = 1;
 static const uint8_t pfmControlFlagForceBuffered = 2;
+static const uint8_t pfmControlFlagSlowAppends = 4;
 
 static const int pfmClientFlagXattr = 0x0001;
 static const int pfmClientFlagAccelerate = 0x0002;
+
+static const int8_t pfmFileNameTypeAny = 0x00;
+static const int8_t pfmFileNameTypeWindows = 0x01;
+static const int8_t pfmFileNameTypeUnix = 0x02;
+static const int8_t pfmFileNameTypeMac = 0x03;
 
 static const int pfmVolumeFlagReadOnly = 0x0001;
 static const int pfmVolumeFlagCompressed = 0x0002;
@@ -533,6 +539,8 @@ struct PfmMarshallerServeParams
    size_t maxDirectMsgSize;
    PT_FD_T toFormatterRead;
    PT_FD_T fromFormatterWrite;
+   int volumeFileNameType;
+   int reserved1;
 
    PfmMarshallerServeParams()
       { memset( this, 0, sizeof( *this)); paramsSize = sizeof( *this);
@@ -764,6 +772,7 @@ struct/*interface*/ PfmMarshaller
    virtual void PT_CCALL ServeCancel() = 0;
    virtual int PT_CCALL GetClientVersion() = 0;
    virtual int PT_CCALL GetClientFlags() = 0;
+   virtual int PT_CCALL GetClientFileNameType() = 0;
 };
 
 #define INTERFACE_NAME PfmMarshallerPreMount
@@ -803,12 +812,14 @@ PT_EXTERNC void PT_CCALL PfmMarshallerSetPreMount( PfmMarshaller* marshaller, Pf
    //       Symlink support.
    //    PfmMarshaller9- 2015.06
    //       Deprecated single-threaded formatter interfaces.
+   //    PfmMarshaller10- 2017.06.23
+   //       Mac/Windows file name conversion support.
 
 #ifndef PFMMARSHALLER_STATIC
 
 PTFACTORY1_DECLARE( PfmMarshaller, PFM_PRODIDW, PFM_APIIDW);
 PT_INLINE int/*error*/ PT_CCALL PfmMarshallerFactory( PfmMarshaller** marshaller)
-   { return PfmMarshallerGetInterface( "PfmMarshaller9", marshaller); }
+   { return PfmMarshallerGetInterface( "PfmMarshaller10", marshaller); }
 // void PfmMarshallerUnload( void);
 
 #endif
