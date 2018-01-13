@@ -36,27 +36,27 @@
 #define PFM_COPYRIGHT               Pismo Technic Inc. Copyright 2006-2017 Joe Lowe
 #define PFM_COPYRIGHTA             "Pismo Technic Inc. Copyright 2006-2017 Joe Lowe"
 #define PFM_COPYRIGHTW            L"Pismo Technic Inc. Copyright 2006-2017 Joe Lowe"
-#define PFM_DATE                    2017.06.23
-#define PFM_DATEA                  "2017.06.23"
-#define PFM_DATEW                 L"2017.06.23"
-#define PFM_BUILDTAG                pfm.1.0.0.185
-#define PFM_BUILDTAGA              "pfm.1.0.0.185"
-#define PFM_BUILDTAGW             L"pfm.1.0.0.185"
-#define PFM_BUILD                   185
-#define PFM_BUILDA                 "185"
-#define PFM_BUILDW                L"185"
+#define PFM_DATE                    2017.11.16
+#define PFM_DATEA                  "2017.11.16"
+#define PFM_DATEW                 L"2017.11.16"
+#define PFM_BUILDTAG                pfm.1.0.0.190
+#define PFM_BUILDTAGA              "pfm.1.0.0.190"
+#define PFM_BUILDTAGW             L"pfm.1.0.0.190"
+#define PFM_BUILD                   190
+#define PFM_BUILDA                 "190"
+#define PFM_BUILDW                L"190"
 #define PFM_PREFIX                  pfm
 #define PFM_PREFIXA                "pfm"
 #define PFM_PREFIXW               L"pfm"
 #define PFM_APIID                   pfmapi
 #define PFM_APIIDA                 "pfmapi"
 #define PFM_APIIDW                L"pfmapi"
-#define PFM_APIBASENAME             pfmapi_185
-#define PFM_APIBASENAMEA           "pfmapi_185"
-#define PFM_APIBASENAMEW          L"pfmapi_185"
-#define PFM_KERNELBASENAME          pfmfs_185
-#define PFM_KERNELBASENAMEA        "pfmfs_185"
-#define PFM_KERNELBASENAMEW       L"pfmfs_185"
+#define PFM_APIBASENAME             pfmapi_190
+#define PFM_APIBASENAMEA           "pfmapi_190"
+#define PFM_APIBASENAMEW          L"pfmapi_190"
+#define PFM_KERNELBASENAME          pfmfs_190
+#define PFM_KERNELBASENAMEA        "pfmfs_190"
+#define PFM_KERNELBASENAMEW       L"pfmfs_190"
 #define PFM_CMDBASENAME             pfm
 #define PFM_CMDBASENAMEA           "pfm"
 #define PFM_CMDBASENAMEW          L"pfm"
@@ -80,6 +80,7 @@ enum {
    pfmMountFlagUnmountOnDisconnect = 0x00040000,
    pfmMountFlagLocalDriveType = 0x00080000,
    pfmMountFlagAccelerate = 0x00200000,
+   pfmMountFlagForceDriveLetter = 0x00400000,
 };
 
 enum {

@@ -1,7 +1,7 @@
 
-Pismo File Mount Development Kit build 185
+Pismo File Mount Development Kit build 190
 Pismo Technic Inc. Copyright 2006-2017 Joe Lowe
-2017.06.23
+2017.11.16
 http://www.pismotechnic.com/
 
 
@@ -24,7 +24,11 @@ Features
 Release History
 ---------------
 
--- build 185 - 2017.06.23
+-- Build 190 - 2017.11.13
+
+Added pfmMountFlagForceDriveLetter mount option.
+
+-- Build 185 - 2017.06.23
 
 Added PFM marshaller support for file name conversions between
 windows and mac/linux.
@@ -61,7 +65,7 @@ and environments, including:
 - C
 - C++
 - C# and other .Net and Mono hosted languages (VB, F#)
-- Java and other JVM hosted languages 
+- Java and other JVM hosted languages
 
 The non-concurrent marshaller interfaces are now deprecated.
 All samples converted to use the concurrent marshaller,

@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-// Copyright 2008-2015 Joe Lowe
+// Copyright 2008-2017 Joe Lowe
 //
 // Permission is granted to any person obtaining a copy of this Software,
 // to deal in the Software without restriction, including the rights to use,
@@ -26,9 +26,9 @@ class AssocArray_Long_Object :
 {
    public Object Get(long key)
    {
-      try { return this[key]; }
-      catch (System.Collections.Generic.KeyNotFoundException) { }
-      return null;
+      Object val;
+      this.TryGetValue(key, out val);
+      return val;
    }
 
    public void Set(long key, Object val)
@@ -40,7 +40,7 @@ class AssocArray_Long_Object :
 class Volume: Pfm.FormatterDispatch
 {
    public Pfm.Marshaller marshaller;
-   const int blockSize = 8888;
+   static readonly int blockSize = 8888;
    long lastFileId;
    long lastOpenSequence;
    long totalBlockCount;
@@ -214,7 +214,6 @@ class Volume: Pfm.FormatterDispatch
       }
       if (actualSize != 0)
       {
-         data = new byte[actualSize];
          int i = 0;
          while (i < actualSize)
          {
@@ -225,11 +224,7 @@ class Volume: Pfm.FormatterDispatch
             {
                partSize = actualSize - i;
             }
-            int k = j + partSize;
-            while (j < k)
-            {
-               data[i++] = block[j++];
-            }
+            Array.Copy(block, j, data, i, partSize);
             i += partSize;
          }
       }
@@ -271,11 +266,7 @@ class Volume: Pfm.FormatterDispatch
             {
                partSize = requestedSize - i;
             }
-            int k = j + partSize;
-            while (j < k)
-            {
-               block[ j++] = data[ i++];
-            }
+            Array.Copy(data, i, block, j, partSize);
             i += partSize;
          }
          if (endOffset > file.fileSize)
@@ -553,10 +544,6 @@ class Volume: Pfm.FormatterDispatch
          if (openRef.openSequence <= openSequence)
          {
             openRefs.Remove( openId);
-            if (openRef.file.nameCount == 0)
-            {
-               FileWrite( openRef.file, 0, null, 0);
-            }
          }
       }
 
@@ -766,8 +753,12 @@ class Volume: Pfm.FormatterDispatch
       long totalCapacity;
       long availableCapacity;
 
-      totalCapacity = totalBlockCount*blockSize;
-      availableCapacity = 1000000000;
+      totalCapacity = 10000000000;
+      availableCapacity = totalCapacity - totalBlockCount * blockSize;
+      if (availableCapacity < 0)
+      {
+         availableCapacity = 0;
+      }
 
       op.Complete( perr, totalCapacity, availableCapacity);
    }
